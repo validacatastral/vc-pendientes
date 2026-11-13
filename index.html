@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pendientes SICUN · Valida Catastral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#f3f2ee;--panel:#fffefa;--ink:#292e2b;--muted:#666c65;--line:#d8dbd2;--green:#476c56;--ochre:#896926;--brick:#a25243;--soft:#e9ece5}
+:root[data-theme=dark]{color-scheme:dark;--bg:#191d1b;--panel:#222824;--ink:#e5e8df;--muted:#afb7ac;--line:#414a41;--green:#a0c0a5;--ochre:#d2b575;--brick:#dda291;--soft:#303831}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,sans-serif}button,input,select{font:inherit;color:inherit}button,a,input,select{touch-action:manipulation}button{cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:9px 13px}button:hover{border-color:var(--green)}button:disabled{cursor:default;opacity:.5}a{color:var(--green)}:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}header{border-bottom:1px solid var(--line);background:var(--panel)}.top{max-width:1440px;margin:auto;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-size:12px;font-weight:700;letter-spacing:.12em}main{max-width:1440px;margin:auto;padding:40px 28px 64px}h1,h2,h3{font-family:'Inter Tight',Inter,sans-serif;line-height:1.15;margin:0 0 14px}h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.035em}h2{font-size:28px}h3{font-size:22px}.muted{color:var(--muted)}.intro{max-width:720px;margin-bottom:30px}.eyebrow{color:var(--green);text-transform:uppercase;font-size:11px;letter-spacing:.15em;font-weight:700;margin-bottom:12px}.mono,.number{font-family:'JetBrains Mono',monospace}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}.card,.notice,.filters{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px}.card{border-top:3px solid var(--green)}.card p{margin:8px 0}.metrics{display:flex;justify-content:space-between;gap:12px;border-block:1px solid var(--line);padding:18px 0;margin:18px 0}.number{font-size:29px;line-height:1.3}.green{color:var(--green)}.ochre{color:var(--ochre)}.brick{color:var(--brick)}.small{font-size:12px}.wide{width:100%}.detail-head,.list-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:22px 0}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip[aria-pressed=true]{background:var(--green);color:var(--bg);border-color:var(--green)}.chip span{font-family:'JetBrains Mono',monospace;margin-left:8px}.filters{margin:20px 0;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}label{display:block;font-size:12px;font-weight:600}select,input{display:block;width:100%;min-width:0;margin-top:6px;padding:11px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.notice{color:var(--muted);line-height:1.8}.table-wrap{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th{text-align:left;font-weight:600;color:var(--muted);background:var(--soft)}td,th{padding:13px 10px;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}td{max-width:210px}td button{font-size:11px;margin-top:7px;padding:5px 8px;display:block}tr:last-child td{border-bottom:0}.badge{font-weight:600}.empty{text-align:center;padding:36px}.status{min-height:24px;color:var(--green);margin:8px 0}footer{border-top:1px solid var(--line);padding:24px 28px;color:var(--muted);font-size:12px}[hidden]{display:none!important}
+@media(max-width:700px){.top{padding:16px}.brand{font-size:10px;max-width:210px}main{padding:28px 16px 40px}.filters{grid-template-columns:1fr;padding:18px}.card,.notice{padding:18px}.table-wrap{border:0;background:none;overflow:visible}table,tbody{display:block;width:100%}thead{display:none}tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:9px;margin-bottom:14px;padding:18px}td{display:block;padding:0;border:0;max-width:none;min-width:0}td:before{content:attr(data-label);display:block;color:var(--muted);font:500 10px Inter,sans-serif;margin-bottom:4px}td:nth-child(n+8){grid-column:1/-1}button{max-width:100%;overflow-wrap:anywhere}.chips{gap:6px}.chip{font-size:12px}.mono{overflow-wrap:anywhere}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="brand">VALIDA CATASTRAL · PENDIENTES SICUN</div><button id="theme" type="button" aria-label="Cambiar tema">Tema oscuro</button></div></header>
+<main>
+<div class="intro"><div class="eyebrow">Seguimiento de validación · Solo lectura</div><h1>Pendientes de revisión</h1><p class="muted">Consulta el cruce de tu Excel de validación con SICUN. Este aviso te ayuda a identificar las filas que todavía requieren atención.</p></div>
+<div id="message" class="notice" role="status">Cargando publicaciones…</div>
+<section id="home" aria-label="Polígonos publicados" hidden><div id="polygons" class="grid"></div></section>
+<section id="detail" hidden aria-label="Detalle del polígono">
+<button id="back" type="button">← Todos los polígonos</button>
+<div class="detail-head"><div><div class="eyebrow">Publicación <span id="published"></span></div><h2>Polígono <span id="polygon" class="mono"></span></h2></div><span class="muted">Selecciona tu nombre para revisar tus filas</span></div>
+<div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
+<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
+<p id="explanation" class="notice"></p>
+<div class="list-head"><strong id="count" aria-live="polite"></strong><button id="copy-list" type="button">Copiar lista</button></div>
+<div id="copy-status" class="status" role="status" aria-live="polite"></div>
+<div class="table-wrap"><table><thead><tr><th>Técnico</th><th>Validador</th><th>FI</th><th>CRC</th><th>Sec-Mz-Lt</th><th>Piso</th><th>Marcó</th><th>Resultado SICUN</th><th>Campos que cambiaron</th><th>Observación</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p id="empty" class="notice empty" hidden>No hay filas para estos filtros.</p>
+</section>
+</main><footer>ValidaCatastral ©diegocampos — Uso interno.</footer>
+<script>
+const API_URL = 'PEGAR_AQUI_URL_EXEC';
+'use strict';
+const $ = id => document.getElementById(id);
+const state = {data:null, visible:[], request:0};
+const str = value => value == null ? '' : typeof value === 'object' ? (Array.isArray(value) ? value.map(str).join(', ') : Object.entries(value).map(([k,v]) => `${k}: ${str(v)}`).join(', ')) : String(value);
+const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+function category(row){
+ const r = norm(row.resultado);
+ if(r.includes('NOAPLICA') || (norm(row.estado)==='NOAPLICA' && /CAMBIO|VERIFICADO|OTROCAMPO/.test(r) && !r.includes('SINCAMBIO'))) return 'noAplica';
+ if(r.includes('SINCAMBIO')) return 'sinCambio';
+ if(r.includes('OTROCAMPO')) return 'otroCampo';
+ if(r.includes('VERIFICADO')) return 'verificado';
+ return 'neutral';
+}
+const pending = row => ['sinCambio','noAplica'].includes(category(row));
+function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=str(text);if(cls)e.className=cls;return e;}
+function theme(value){document.documentElement.dataset.theme=value;$('theme').textContent=value==='dark'?'Tema claro':'Tema oscuro';$('theme').setAttribute('aria-pressed',String(value==='dark'));}
+let saved;try{saved=localStorage.getItem('vc-pend-theme');}catch{}
+theme(['light','dark'].includes(saved)?saved:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+$('theme').onclick=()=>{const value=document.documentElement.dataset.theme==='dark'?'light':'dark';theme(value);try{localStorage.setItem('vc-pend-theme',value);}catch{}};
+function route(){const p=new URLSearchParams(location.hash.slice(1));return {pol:p.get('pol')||'',tec:p.get('tec')||''};}
+function navigate(pol='',tec=''){const p=new URLSearchParams();if(pol)p.set('pol',pol);if(tec)p.set('tec',tec);const hash=p.toString();if(location.hash.slice(1)===hash)load();else location.hash=hash;}
+function message(text){$('message').textContent=text;$('message').hidden=false;}
+async function api(pol){
+ const url=new URL(API_URL);url.searchParams.set('api','pendientes');if(pol)url.searchParams.set('pol',pol);
+ const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);
+ try{const res=await fetch(url,{signal:controller.signal,cache:'no-store',credentials:'omit'});if(!res.ok)throw Error('HTTP '+res.status);return await res.json();}finally{clearTimeout(timer);}
+}
+function number(value){const n=Number(value);return Number.isFinite(n)&&n>=0?n:0;}
+function renderHome(items){
+ $('polygons').replaceChildren();
+ for(const item of items){
+ const card=node('article',undefined,'card');card.append(node('div','POLÍGONO','eyebrow'),node('h3',item.poligono,'mono'),node('p',`Publicado: ${str(item.publicado)||'Sin fecha'}`,'muted small'),node('p',`${str(item.antes)||'—'} → ${str(item.despues)||'—'}`,'mono small'));
+ const t=item.totales||{},v=number(t.verificado),o=number(t.otroCampo),s=number(t.sinCambio),den=v+o+s;
+ const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',den?`${Math.round(v/den*100)}%`:'—','number green'),node('div','SICUN confirma','small muted'));const attention=node('div');attention.append(node('div',t.pendientes!=null?number(t.pendientes):s+number(t.noAplica),'number brick'),node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
+ const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
+ }
+ $('home').hidden=false;if(!items.length)message('Todavía no hay polígonos publicados.');
+}
+function renderDetail(data){
+ $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
+ $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`;
+ const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
+ $('chips').replaceChildren();
+ for(const tec of ['',...technicians.filter(Boolean)]){const b=node('button',tec||'Todos','chip');b.type='button';b.dataset.tec=tec;b.append(node('span',data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&pending(r)).length));b.onclick=()=>navigate(route().pol,tec);$('chips').append(b);}
+ $('validator').replaceChildren(new Option('Todos los validadores',''));for(const v of [...new Set(data.filas.map(r=>str(r.validador)))].filter(Boolean).sort())$('validator').add(new Option(v,v));
+ $('result').value='pending';$('search').value='';$('detail').hidden=false;filter();
+}
+function filter(){
+ if(!state.data)return;const {tec}=route(),result=$('result').value,validator=$('validator').value,search=$('search').value.trim().toUpperCase();
+ for(const b of $('chips').children)b.setAttribute('aria-pressed',String(b.dataset.tec===tec));
+ const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&str(r.codigo).toUpperCase().includes(search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
+ state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));$('copy-status').textContent='';
+ for(const row of rows){const tr=node('tr');const values=[row.tecnico,row.validador,row.fi,row.codigo,row.smz,row.piso,row.estado,row.resultado,row.campos,row.obs];const labels=['Técnico','Validador','FI','CRC','Sec-Mz-Lt','Piso','Marcó','Resultado SICUN','Campos que cambiaron','Observación'];values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
+}
+async function copy(text){try{await navigator.clipboard.writeText(text);$('copy-status').textContent='Copiado al portapapeles.';}catch{$('copy-status').textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
+$('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
+$('back').onclick=()=>navigate();$('result').onchange=filter;$('validator').onchange=filter;$('search').oninput=filter;
+async function load(){
+ const id=++state.request,{pol}=route();$('copy-status').textContent='';
+ if(pol&&state.data&&str(state.data.poligono)===pol){$('message').hidden=true;$('home').hidden=true;$('detail').hidden=false;filter();return;}
+ $('home').hidden=true;$('detail').hidden=true;
+ if(!API_URL.trim()||API_URL==='PEGAR_AQUI_URL_EXEC'){message('La API de pendientes todavía no está configurada. Rodrigo debe completar API_URL con la URL /exec del comparador.');return;}
+ message('Cargando publicación…');
+ try{const data=await api(pol);if(id!==state.request)return;if(pol){if(!data||!Array.isArray(data.filas)||str(data.poligono)!==pol)throw Error('Formato inválido');state.data=data;$('message').hidden=true;renderDetail(data);}else{if(!Array.isArray(data)||data.some(i=>!i||!i.poligono))throw Error('Formato inválido');state.data=null;$('message').hidden=true;renderHome(data);}}
+ catch{if(id!==state.request)return;message('No se pudo cargar la publicación de pendientes. Verifica la conexión y que la API esté publicada y accesible.');const retry=node('button','Reintentar');retry.type='button';retry.style.marginLeft='12px';retry.onclick=load;$('message').append(retry);}
+}
+window.addEventListener('hashchange',load);load();
+</script>
+</body>
+</html>
