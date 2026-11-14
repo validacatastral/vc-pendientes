@@ -67,8 +67,8 @@ function renderHome(items){
  $('polygons').replaceChildren();
  for(const item of items){
  const card=node('article',undefined,'card');card.append(node('div','POLÍGONO','eyebrow'),node('h3',item.poligono,'mono'),node('p',`Publicado: ${str(item.publicado)||'Sin fecha'}`,'muted small'),node('p',`${str(item.antes)||'—'} → ${str(item.despues)||'—'}`,'mono small'));
- const t=item.totales||{},v=number(t.verificado),o=number(t.otroCampo),s=number(t.sinCambio),den=v+o+s;
- const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',den?`${Math.round(v/den*100)}%`:'—','number green'),node('div','SICUN confirma','small muted'));const attention=node('div');attention.append(node('div',t.pendientes!=null?number(t.pendientes):s+number(t.noAplica),'number brick'),node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
+ const t=item.totales||{},v=number(t.verificado),o=number(t.otroCampo),s=number(t.sinCambio),den=number(t.filas)-number(t.noEncontrado)-number(t.invalido);
+ const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',den?`${Math.round((v+o)/den*100)}%`:'—','number green'),node('div','SICUN confirma','small muted'));const attention=node('div');attention.append(node('div',s+number(t.noAplicaConCambio),'number brick'),node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
  }
  $('home').hidden=false;if(!items.length)message('Todavía no hay polígonos publicados.');
@@ -98,7 +98,7 @@ async function load(){
  $('home').hidden=true;$('detail').hidden=true;
  if(!API_URL.trim()||API_URL==='PEGAR_AQUI_URL_EXEC'){message('La API de pendientes todavía no está configurada. Rodrigo debe completar API_URL con la URL /exec del comparador.');return;}
  message('Cargando publicación…');
- try{const data=await api(pol);if(id!==state.request)return;if(pol){if(!data||!Array.isArray(data.filas)||str(data.poligono)!==pol)throw Error('Formato inválido');state.data=data;$('message').hidden=true;renderDetail(data);}else{if(!Array.isArray(data)||data.some(i=>!i||!i.poligono))throw Error('Formato inválido');state.data=null;$('message').hidden=true;renderHome(data);}}
+ try{const data=await api(pol);if(id!==state.request)return;if(pol){if(data&&data.ok===false){message('Este polígono no tiene publicación');return;}if(!data||!Array.isArray(data.filas)||str(data.poligono)!==pol)throw Error('Formato inválido');state.data=data;$('message').hidden=true;renderDetail(data);}else{const items = Array.isArray(data) ? data : (data && Array.isArray(data.poligonos) ? data.poligonos : null);if((data&&data.ok===false)||items===null||items.some(i=>!i||!i.poligono))throw Error('Formato inválido');state.data=null;$('message').hidden=true;renderHome(items);}}
  catch{if(id!==state.request)return;message('No se pudo cargar la publicación de pendientes. Verifica la conexión y que la API esté publicada y accesible.');const retry=node('button','Reintentar');retry.type='button';retry.style.marginLeft='12px';retry.onclick=load;$('message').append(retry);}
 }
 window.addEventListener('hashchange',load);load();
