@@ -20,7 +20,13 @@
 <main>
 <div class="intro"><div class="eyebrow">Seguimiento de validación · Solo lectura</div><h1>Pendientes de revisión</h1><p class="muted">Consulta el cruce de tu Excel de validación con SICUN. Este aviso te ayuda a identificar las filas que todavía requieren atención.</p></div>
 <div id="message" class="notice" role="status">Cargando publicaciones…</div>
-<section id="home" aria-label="Polígonos publicados" hidden><div id="polygons" class="grid"></div></section>
+<section id="home" aria-label="Polígonos publicados" hidden>
+<div class="filters"><label>Distrito<select id="district"><option value="">Todos</option><option value="INDEPENDENCIA">Independencia</option><option value="COMAS">Comas</option></select></label><label>Buscar por polígono<input id="polygon-search" type="search" placeholder="Escribe un polígono" autocomplete="off"></label><label>Orden<select id="polygon-order"><option value="pol">Polígono</option><option value="pending">Más pendientes</option><option value="published">Última publicación</option></select></label></div>
+<p id="polygon-count" class="muted small" aria-live="polite"></p>
+<p id="district-status" class="status" role="status"></p>
+<div id="polygons" class="grid"></div>
+<p id="polygons-empty" class="notice empty" hidden>No hay polígonos para estos filtros.</p>
+</section>
 <section id="detail" hidden aria-label="Detalle del polígono">
 <button id="back" type="button">← Todos los polígonos</button>
 <div class="detail-head"><div><div class="eyebrow">Publicación <span id="published"></span></div><h2>Polígono <span id="polygon" class="mono"></span></h2></div><span class="muted">Selecciona tu nombre para revisar tus filas</span></div>
@@ -37,7 +43,7 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbwcXmwvdy0D5ROteOFL9z_fbmelZhE11bgG_nS7McpqDXzlTa28KHd6EgnUChisjZjF/exec';
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {data:null, visible:[], request:0};
+const state = {data:null, visible:[], request:0, items:[], districts:new Map(), districtJob:null};
 const str = value => value == null ? '' : typeof value === 'object' ? (Array.isArray(value) ? value.map(str).join(', ') : Object.entries(value).map(([k,v]) => `${k}: ${str(v)}`).join(', ')) : String(value);
 const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function category(row){
@@ -63,15 +69,82 @@ async function api(pol){
  try{const res=await fetch(url,{signal:controller.signal,cache:'no-store',credentials:'omit'});if(!res.ok)throw Error('HTTP '+res.status);return await res.json();}finally{clearTimeout(timer);}
 }
 function number(value){const n=Number(value);return Number.isFinite(n)&&n>=0?n:0;}
+const homeStorageKey='vc-pend-filters';
+try{
+ const saved=JSON.parse(localStorage.getItem(homeStorageKey));
+ if(saved&&typeof saved==='object'){
+  if(['','INDEPENDENCIA','COMAS'].includes(saved.district))$('district').value=saved.district;
+  if(typeof saved.search==='string')$('polygon-search').value=saved.search;
+  if(['pol','pending','published'].includes(saved.order))$('polygon-order').value=saved.order;
+ }
+}catch{}
+function district(data){
+ const names={'150112':'INDEPENDENCIA','150110':'COMAS'},explicit=norm(data.distrito);
+ if(['INDEPENDENCIA','COMAS'].includes(explicit))return explicit;
+ if(names[explicit])return names[explicit];
+ for(const row of Array.isArray(data.filas)?data.filas:[]){
+  const found=names[str(row&&row.codigo).trim().slice(0,6)];
+  if(found)return found;
+ }
+ return '';
+}
+const itemDistrict=item=>district(item)||state.districts.get(str(item.poligono))||'';
+const pendingTotal=item=>number((item.totales||{}).sinCambio)+number((item.totales||{}).noAplicaConCambio);
+function publishedTime(value){
+ const text=str(value).trim(),local=text.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?(?:[ ,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+ // El comparador también publica fechas en formato peruano; evitar interpretarlas como mm/dd.
+ const time=local?Date.UTC(Number(local[3]||new Date().getFullYear()),Number(local[2])-1,Number(local[1]),Number(local[4]||0)+5,Number(local[5]||0),Number(local[6]||0)):Date.parse(text);
+ return Number.isFinite(time)?time:0;
+}
+function filterHome(){
+ try{localStorage.setItem(homeStorageKey,JSON.stringify({district:$('district').value,search:$('polygon-search').value,order:$('polygon-order').value}));}catch{}
+ renderHome(state.items);resolveDistricts();
+}
+async function resolveDistricts(){
+ if(!$('district').value||state.districtJob||route().pol)return;
+ const missing=state.items.filter(item=>!itemDistrict(item)&&!state.districts.has(str(item.poligono)));
+ if(!missing.length)return;
+ const job={request:state.request};state.districtJob=job;renderHome(state.items);
+ async function worker(){
+  while(missing.length&&job.request===state.request&&$('district').value){
+   const item=missing.shift(),pol=str(item.poligono);
+   try{
+    const data=await api(pol);
+    if(!data||data.ok===false||str(data.poligono)!==pol||!Array.isArray(data.filas))throw Error('Formato inválido');
+    state.districts.set(pol,district(data));
+   }catch{} // No confundir un error de red con un distrito desconocido.
+   if(job.request===state.request)renderHome(state.items);
+  }
+ }
+ await Promise.all(Array.from({length:Math.min(3,missing.length)},worker));
+ state.districtJob=null;
+ if(!route().pol&&!$('home').hidden){renderHome(state.items);if(job.request!==state.request)resolveDistricts();}
+}
 function renderHome(items){
+ const selected=$('district').value,search=$('polygon-search').value.trim().toUpperCase(),order=$('polygon-order').value;
+ const visible=items.filter(item=>(!selected||itemDistrict(item)===selected)&&str(item.poligono).toUpperCase().includes(search));
+ const byPolygon=(a,b)=>str(a.poligono).localeCompare(str(b.poligono),'es',{numeric:true});
+ visible.sort((a,b)=>(order==='pending'?pendingTotal(b)-pendingTotal(a):order==='published'?publishedTime(b.publicado)-publishedTime(a.publicado):0)||byPolygon(a,b));
  $('polygons').replaceChildren();
- for(const item of items){
+ for(const item of visible){
  const card=node('article',undefined,'card');card.append(node('div','POLÍGONO','eyebrow'),node('h3',item.poligono,'mono'),node('p',`Publicado: ${str(item.publicado)||'Sin fecha'}`,'muted small'),node('p',`${str(item.antes)||'—'} → ${str(item.despues)||'—'}`,'mono small'));
+ if(item.parcial===true)card.append(node('p',`parcial${str(item.parcialDetalle).trim()?' · falta '+str(item.parcialDetalle):''}`,'ochre small'));
  const t=item.totales||{},v=number(t.verificado),o=number(t.otroCampo),s=number(t.sinCambio),den=number(t.filas)-number(t.noEncontrado)-number(t.invalido);
  const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',den?`${Math.round((v+o)/den*100)}%`:'—','number green'),node('div','SICUN confirma','small muted'));const attention=node('div');attention.append(node('div',s+number(t.noAplicaConCambio),'number brick'),node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
  }
- $('home').hidden=false;if(!items.length)message('Todavía no hay polígonos publicados.');
+ $('polygon-count').textContent=`${visible.length} de ${items.length} polígonos`;
+ $('polygons-empty').hidden=visible.length>0;
+ $('polygons-empty').textContent=items.length?'No hay polígonos para estos filtros.':'Todavía no hay polígonos publicados.';
+ const unknown=selected?items.filter(item=>!itemDistrict(item)).length:0;
+ const unresolved=selected?items.filter(item=>!itemDistrict(item)&&!state.districts.has(str(item.poligono))).length:0;
+ $('district-status').replaceChildren();
+ if(unknown){
+  $('district-status').textContent=state.districtJob?'Identificando distritos…':`${unknown} ${unknown===1?'polígono sin distrito identificado':'polígonos sin distrito identificado'}. Puedes verlos en Todos.`;
+  if(unresolved&&!state.districtJob){const retry=node('button','Reintentar');retry.type='button';retry.onclick=resolveDistricts;$('district-status').append(' ',retry);}
+ }
+ $('district-status').hidden=!unknown;
+ $('home').hidden=false;
 }
 function renderDetail(data){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
@@ -92,13 +165,14 @@ function filter(){
 async function copy(text){try{await navigator.clipboard.writeText(text);$('copy-status').textContent='Copiado al portapapeles.';}catch{$('copy-status').textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
 $('back').onclick=()=>navigate();$('result').onchange=filter;$('validator').onchange=filter;$('search').oninput=filter;
+$('district').onchange=filterHome;$('polygon-search').oninput=filterHome;$('polygon-order').onchange=filterHome;
 async function load(){
  const id=++state.request,{pol}=route();$('copy-status').textContent='';
  if(pol&&state.data&&str(state.data.poligono)===pol){$('message').hidden=true;$('home').hidden=true;$('detail').hidden=false;filter();return;}
  $('home').hidden=true;$('detail').hidden=true;
  if(!API_URL.trim()||API_URL==='PEGAR_AQUI_URL_EXEC'){message('La API de pendientes todavía no está configurada. Rodrigo debe completar API_URL con la URL /exec del comparador.');return;}
  message('Cargando publicación…');
- try{const data=await api(pol);if(id!==state.request)return;if(pol){if(data&&data.ok===false){message('Este polígono no tiene publicación');return;}if(!data||!Array.isArray(data.filas)||str(data.poligono)!==pol)throw Error('Formato inválido');state.data=data;$('message').hidden=true;renderDetail(data);}else{const items = Array.isArray(data) ? data : (data && Array.isArray(data.poligonos) ? data.poligonos : null);if((data&&data.ok===false)||items===null||items.some(i=>!i||!i.poligono))throw Error('Formato inválido');state.data=null;$('message').hidden=true;renderHome(items);}}
+ try{const data=await api(pol);if(id!==state.request)return;if(pol){if(data&&data.ok===false){message('Este polígono no tiene publicación');return;}if(!data||!Array.isArray(data.filas)||str(data.poligono)!==pol)throw Error('Formato inválido');state.data=data;state.districts.set(pol,district(data));$('message').hidden=true;renderDetail(data);}else{const items = Array.isArray(data) ? data : (data && Array.isArray(data.poligonos) ? data.poligonos : null);if((data&&data.ok===false)||items===null||items.some(i=>!i||!i.poligono))throw Error('Formato inválido');state.data=null;state.items=items;$('message').hidden=true;renderHome(items);resolveDistricts();}}
  catch{if(id!==state.request)return;message('No se pudo cargar la publicación de pendientes. Verifica la conexión y que la API esté publicada y accesible.');const retry=node('button','Reintentar');retry.type='button';retry.style.marginLeft='12px';retry.onclick=load;$('message').append(retry);}
 }
 window.addEventListener('hashchange',load);load();

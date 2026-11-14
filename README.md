@@ -2,7 +2,7 @@
 
 Página pública de **solo lectura** para que cada técnico consulte las filas de su Excel de validación que requieren atención según el cruce con SICUN. El aviso es informativo y permite revisar y corregir la validación.
 
-Todo el código está en `index.html`, sin frameworks ni proceso de compilación. El repositorio **no contiene datos**, Excel, CRC ni publicaciones; los datos se consultan en la API al abrir la página y no se guardan en localStorage. Solo se guarda la preferencia de tema (`vc-pend-theme`). No requiere login e incluye `noindex,nofollow` (esto evita la indexación voluntaria, pero no restringe el acceso público).
+Todo el código está en `index.html`, sin frameworks ni proceso de compilación. El repositorio **no contiene datos**, Excel, CRC ni publicaciones; los datos se consultan en la API al abrir la página y no se guardan en localStorage. Solo se guardan la preferencia de tema (`vc-pend-theme`) y el distrito, búsqueda por polígono y orden de la portada (`vc-pend-filters`), con lectura y escritura protegidas por `try/catch`. No requiere login e incluye `noindex,nofollow` (esto evita la indexación voluntaria, pero no restringe el acceso público).
 
 ## Configuración
 
@@ -32,9 +32,13 @@ Contrato de lectura:
 
 ## Uso
 
+La portada permite filtrar por Todos, Independencia o Comas, buscar por polígono y ordenar por polígono (orden numérico), más pendientes o última publicación. Se restauran las últimas opciones al volver a abrir la página. El distrito se toma del campo opcional `distrito`; si falta, se deduce del prefijo del CRC (`codigo`): `150112` = Independencia y `150110` = Comas. Cuando el listado no trae esa información, al elegir un distrito se consultan los detalles con la misma API, hasta tres a la vez, y se conserva el distrito solo en memoria. Los polígonos sin distrito identificable siguen disponibles en Todos; si falla una consulta, aparece Reintentar.
+
+Si el listado incluye `parcial: true`, la tarjeta muestra `parcial · falta X`, usando `parcialDetalle` como X. Sin detalle se muestra solo `parcial`; si `parcial` no viene o es falso, no se agrega el aviso. Ambos campos son opcionales.
+
 Abrir un polígono y seleccionar un técnico. Por defecto se muestran SIN CAMBIO EN SICUN y NO APLICA pero SICUN cambió. Los filtros de resultado, validador y CRC se combinan. “Copiar lista” copia los CRC de las filas visibles, uno por línea; cada fila también permite copiar su CRC. El portapapeles requiere HTTPS o localhost y permiso del navegador; si falla se informa en la página.
 
-El fragmento de URL conserva polígono y técnico, por ejemplo `#pol=260210019&tec=CRISTINA`. Se pueden compartir enlaces directos y usar atrás/adelante del navegador. En pantallas de hasta 700 px, las filas se presentan como tarjetas.
+El fragmento de URL conserva polígono y técnico, por ejemplo `#pol=260210019&tec=CRISTINA`. Los enlaces directos abren el polígono independientemente del distrito o búsqueda guardados. Se pueden compartir enlaces directos y usar atrás/adelante del navegador. En pantallas de hasta 700 px, las filas se presentan como tarjetas.
 
 ## Verificación local
 
