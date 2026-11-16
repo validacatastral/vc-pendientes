@@ -33,7 +33,7 @@
 <div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
 <div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
 <p id="explanation" class="notice"></p>
-<div class="list-head"><strong id="count" aria-live="polite"></strong><button id="copy-list" type="button">Copiar lista</button></div>
+<div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button></span></div>
 <div id="copy-status" class="status" role="status" aria-live="polite"></div>
 <div class="table-wrap"><table><thead><tr><th>Técnico</th><th>Validador</th><th>FI</th><th>CRC</th><th>Sec-Mz-Lt</th><th>Piso</th><th>Marcó</th><th>Resultado SICUN</th><th>Campos que cambiaron</th><th>Observación</th></tr></thead><tbody id="rows"></tbody></table></div>
 <p id="empty" class="notice empty" hidden>No hay filas para estos filtros.</p>
@@ -157,15 +157,54 @@ function renderDetail(data){
  $('validator').replaceChildren(new Option('Todos los validadores',''));for(const v of [...new Set(data.filas.map(r=>str(r.validador)))].filter(Boolean).sort())$('validator').add(new Option(v,v));
  $('result').value='pending';$('search').value='';$('detail').hidden=false;filter();
 }
+const COLUMNS=['Técnico','Validador','FI','CRC','Sec-Mz-Lt','Piso','Marcó','Resultado SICUN','Campos que cambiaron','Observación'];
+function rowValues(row){return [row.tecnico,row.validador,row.fi,row.codigo,row.smz,row.piso,row.estado,row.resultado,row.campos,row.obs];}
 function filter(){
  if(!state.data)return;const {tec}=route(),result=$('result').value,validator=$('validator').value,search=$('search').value.trim().toUpperCase();
  for(const b of $('chips').children)b.setAttribute('aria-pressed',String(b.dataset.tec===tec));
  const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&str(r.codigo).toUpperCase().includes(search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
- state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));$('copy-status').textContent='';
- for(const row of rows){const tr=node('tr');const values=[row.tecnico,row.validador,row.fi,row.codigo,row.smz,row.piso,row.estado,row.resultado,row.campos,row.obs];const labels=['Técnico','Validador','FI','CRC','Sec-Mz-Lt','Piso','Marcó','Resultado SICUN','Campos que cambiaron','Observación'];values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
+ state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));$('download-xlsx').disabled=!rows.length;$('copy-status').textContent='';
+ for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
 }
 async function copy(text){try{await navigator.clipboard.writeText(text);$('copy-status').textContent='Copiado al portapapeles.';}catch{$('copy-status').textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
+/* Descargar Excel: filas visibles con las columnas de la tabla. XLSX mínimo sin librerías (ZIP sin compresión);
+   todas las celdas van como texto (inlineStr + formato @) para que CRC y FI conserven sus 24 dígitos y ceros, sin notación científica. */
+function xlsxName(pol,date){const p=n=>String(n).padStart(2,'0');return `pendientes_${str(pol).replace(/[^\w-]/g,'')}_${p(date.getFullYear()%100)}${p(date.getMonth()+1)}${p(date.getDate())}.xlsx`;}
+function xlsxCol(i){let s='';for(i++;i;i=Math.floor((i-1)/26))s=String.fromCharCode(65+(i-1)%26)+s;return s;}
+function xlsxEsc(value){return str(value).replace(/[^\x09\x0A\x0D\x20-퟿-�]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function xlsxCrc(bytes){let c=~0;for(let i=0;i<bytes.length;i++){c^=bytes[i];for(let k=0;k<8;k++)c=c>>>1^(c&1?0xEDB88320:0);}return ~c>>>0;}
+function xlsxZip(files){
+ const enc=new TextEncoder(),parts=[],central=[];let offset=0;
+ const header=(size,fields)=>{const v=new DataView(new ArrayBuffer(size));let p=0;for(const [bytes,value] of fields){if(bytes===4)v.setUint32(p,value,true);else v.setUint16(p,value,true);p+=bytes;}return new Uint8Array(v.buffer);};
+ for(const [name,text] of files){
+  const n=enc.encode(name),d=enc.encode(text),crc=xlsxCrc(d),common=[[2,20],[2,0x0800],[2,0],[2,0],[2,0x21],[4,crc],[4,d.length],[4,d.length],[2,n.length],[2,0]];
+  parts.push(header(30,[[4,0x04034b50],...common]),n,d);
+  central.push(header(46,[[4,0x02014b50],[2,20],...common,[2,0],[2,0],[2,0],[4,0],[4,offset]]),n);
+  offset+=30+n.length+d.length;
+ }
+ const size=central.reduce((s,b)=>s+b.length,0);
+ parts.push(...central,header(22,[[4,0x06054b50],[2,0],[2,0],[2,files.length],[2,files.length],[4,size],[4,offset],[2,0]]));
+ const out=new Uint8Array(offset+size+22);let p=0;for(const b of parts){out.set(b,p);p+=b.length;}return out;
+}
+function xlsxBytes(rows){
+ const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',M='http://schemas.openxmlformats.org/spreadsheetml/2006/main',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',P='http://schemas.openxmlformats.org/package/2006/relationships',T='application/vnd.openxmlformats-officedocument.spreadsheetml.';
+ const sheet=[COLUMNS,...rows.map(rowValues)].map((cells,r)=>`<row r="${r+1}">`+cells.map((value,c)=>`<c r="${xlsxCol(c)}${r+1}" s="1" t="inlineStr"><is><t xml:space="preserve">${xlsxEsc(value)}</t></is></c>`).join('')+'</row>').join('');
+ return xlsxZip([
+  ['[Content_Types].xml',`${X}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="${T}sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="${T}worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="${T}styles+xml"/></Types>`],
+  ['_rels/.rels',`${X}<Relationships xmlns="${P}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+  ['xl/workbook.xml',`${X}<workbook xmlns="${M}" xmlns:r="${R}"><sheets><sheet name="Pendientes" sheetId="1" r:id="rId1"/></sheets></workbook>`],
+  ['xl/_rels/workbook.xml.rels',`${X}<Relationships xmlns="${P}"><Relationship Id="rId1" Type="${R}/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${R}/styles" Target="styles.xml"/></Relationships>`],
+  ['xl/styles.xml',`${X}<styleSheet xmlns="${M}"><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>`],
+  ['xl/worksheets/sheet1.xml',`${X}<worksheet xmlns="${M}"><sheetData>${sheet}</sheetData></worksheet>`]
+ ]);
+}
+$('download-xlsx').onclick=()=>{
+ if(!state.data||!state.visible.length)return;
+ const url=URL.createObjectURL(new Blob([xlsxBytes(state.visible)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+ const a=document.createElement('a');a.href=url;a.download=xlsxName(state.data.poligono,new Date());document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ $('copy-status').textContent=`Excel descargado: ${state.visible.length} ${state.visible.length===1?'fila':'filas'}.`;
+};
 $('back').onclick=()=>navigate();$('result').onchange=filter;$('validator').onchange=filter;$('search').oninput=filter;
 $('district').onchange=filterHome;$('polygon-search').oninput=filterHome;$('polygon-order').onchange=filterHome;
 async function load(){
