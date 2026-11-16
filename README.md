@@ -27,7 +27,7 @@ Contrato de lectura:
 - `GET API_URL?api=pendientes`: lista de `{poligono, publicado, antes, despues, totales}`.
 - `GET API_URL?api=pendientes&pol=<poligono>`: `{poligono, publicado, antes, despues, totales, porValidador, porTecnico, filas}`.
 - Cada fila contiene `{poligono, tecnico, hoja, validador, fi, codigo, smz, piso, estado, resultado, campos, obs}`. `codigo` es el CRC. Enviar identificadores como cadenas para conservar ceros iniciales.
-- `totales` contiene `verificado`, `otroCampo`, `sinCambio`, `noAplica` y, opcionalmente, `pendientes`. Si no viene `pendientes`, se calcula como `sinCambio + noAplica`. “SICUN confirma” = `verificado / (verificado + otroCampo + sinCambio)`; sin denominador se muestra `—`.
+- `totales` contiene `verificado`, `otroCampo`, `sinCambio`, `noAplica` y, opcionalmente, `pendientes`. Si no viene `pendientes`, se calcula como `sinCambio + noAplica`. La tarjeta muestra ese número y, aparte, los avisos `otroCampo` (por ejemplo `41 · ◐ 18`). “SICUN confirma” = `verificado / (verificado + otroCampo + sinCambio)`; sin denominador se muestra `—`.
 - `resultado` admite etiquetas legibles o claves equivalentes como `sinCambio`, `noAplica`, `otroCampo` y `verificado`; se normalizan mayúsculas, espacios, acentos y símbolos. `noAplica` representa NO APLICA con cambio en SICUN. Otros resultados se muestran en la opción “Todos los resultados”. Los chips cuentan pendientes a partir de las filas, independientemente del resto de filtros.
 
 ## Uso
@@ -36,7 +36,7 @@ La portada permite filtrar por Todos, Independencia o Comas, buscar por polígon
 
 Si el listado incluye `parcial: true`, la tarjeta muestra `parcial · falta X`, usando `parcialDetalle` como X. Sin detalle se muestra solo `parcial`; si `parcial` no viene o es falso, no se agrega el aviso. Ambos campos son opcionales.
 
-Abrir un polígono y seleccionar un técnico. Por defecto se muestran SIN CAMBIO EN SICUN y NO APLICA pero SICUN cambió. Los filtros de resultado, validador y CRC se combinan. “Copiar lista” copia los CRC de las filas visibles, uno por línea; cada fila también permite copiar su CRC. El portapapeles requiere HTTPS o localhost y permiso del navegador; si falla se informa en la página.
+Abrir un polígono y seleccionar un técnico. Por defecto se muestran SIN CAMBIO EN SICUN, NO APLICA pero SICUN cambió y, como aviso, ◐ Cambió otro campo, no el observado (marcó APLICA y SICUN cambió, pero ningún campo esperado del validador). Los filtros de resultado, validador y CRC se combinan. “Copiar lista” copia los CRC de las filas visibles, uno por línea; cada fila también permite copiar su CRC. El portapapeles requiere HTTPS o localhost y permiso del navegador; si falla se informa en la página.
 
 El fragmento de URL conserva polígono y técnico, por ejemplo `#pol=260210019&tec=CRISTINA`. Los enlaces directos abren el polígono independientemente del distrito o búsqueda guardados. Se pueden compartir enlaces directos y usar atrás/adelante del navegador. En pantallas de hasta 700 px, las filas se presentan como tarjetas.
 

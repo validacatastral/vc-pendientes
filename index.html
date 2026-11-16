@@ -31,7 +31,7 @@
 <button id="back" type="button">← Todos los polígonos</button>
 <div class="detail-head"><div><div class="eyebrow">Publicación <span id="published"></span></div><h2>Polígono <span id="polygon" class="mono"></span></h2></div><span class="muted">Selecciona tu nombre para revisar tus filas</span></div>
 <div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
-<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
+<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
 <p id="explanation" class="notice"></p>
 <div class="list-head"><strong id="count" aria-live="polite"></strong><button id="copy-list" type="button">Copiar lista</button></div>
 <div id="copy-status" class="status" role="status" aria-live="polite"></div>
@@ -54,7 +54,7 @@ function category(row){
  if(r.includes('VERIFICADO')) return 'verificado';
  return 'neutral';
 }
-const pending = row => ['sinCambio','noAplica'].includes(category(row));
+const pending = row => ['sinCambio','noAplica','otroCampo'].includes(category(row));
 function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=str(text);if(cls)e.className=cls;return e;}
 function theme(value){document.documentElement.dataset.theme=value;$('theme').textContent=value==='dark'?'Tema claro':'Tema oscuro';$('theme').setAttribute('aria-pressed',String(value==='dark'));}
 let saved;try{saved=localStorage.getItem('vc-pend-theme');}catch{}
@@ -130,7 +130,7 @@ function renderHome(items){
  const card=node('article',undefined,'card');card.append(node('div','POLÍGONO','eyebrow'),node('h3',item.poligono,'mono'),node('p',`Publicado: ${str(item.publicado)||'Sin fecha'}`,'muted small'),node('p',`${str(item.antes)||'—'} → ${str(item.despues)||'—'}`,'mono small'));
  if(item.parcial===true)card.append(node('p',`parcial${str(item.parcialDetalle).trim()?' · falta '+str(item.parcialDetalle):''}`,'ochre small'));
  const t=item.totales||{},v=number(t.verificado),o=number(t.otroCampo),s=number(t.sinCambio),den=number(t.filas)-number(t.noEncontrado)-number(t.invalido);
- const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',den?`${Math.round((v+o)/den*100)}%`:'—','number green'),node('div','SICUN confirma','small muted'));const attention=node('div');attention.append(node('div',s+number(t.noAplicaConCambio),'number brick'),node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
+ const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',den?`${Math.round((v+o)/den*100)}%`:'—','number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',s+number(t.noAplicaConCambio),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
  }
  $('polygon-count').textContent=`${visible.length} de ${items.length} polígonos`;
@@ -148,7 +148,7 @@ function renderHome(items){
 }
 function renderDetail(data){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
- $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`;
+ $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`;
  const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
  $('chips').replaceChildren();
  for(const tec of ['',...technicians.filter(Boolean)]){const b=node('button',tec||'Todos','chip');b.type='button';b.dataset.tec=tec;b.append(node('span',data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&pending(r)).length));b.onclick=()=>navigate(route().pol,tec);$('chips').append(b);}
