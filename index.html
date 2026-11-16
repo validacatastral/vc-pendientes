@@ -89,6 +89,8 @@ function district(data){
  return '';
 }
 const itemDistrict=item=>district(item)||state.districts.get(str(item.poligono))||'';
+/* SICUN confirma: solo ✔ verificado sobre las filas cruzadas (sin no encontrado ni inválido). ◐ cambió otro campo NO cuenta como confirmado. */
+function confirma(t){t=t||{};const den=number(t.filas)-number(t.noEncontrado)-number(t.invalido);return den>0?`${Math.round(number(t.verificado)/den*100)}%`:'—';}
 const pendingTotal=item=>number((item.totales||{}).sinCambio)+number((item.totales||{}).noAplicaConCambio);
 function publishedTime(value){
  const text=str(value).trim(),local=text.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?(?:[ ,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
@@ -129,8 +131,8 @@ function renderHome(items){
  for(const item of visible){
  const card=node('article',undefined,'card');card.append(node('div','POLÍGONO','eyebrow'),node('h3',item.poligono,'mono'),node('p',`Publicado: ${str(item.publicado)||'Sin fecha'}`,'muted small'),node('p',`${str(item.antes)||'—'} → ${str(item.despues)||'—'}`,'mono small'));
  if(item.parcial===true)card.append(node('p',`parcial${str(item.parcialDetalle).trim()?' · falta '+str(item.parcialDetalle):''}`,'ochre small'));
- const t=item.totales||{},v=number(t.verificado),o=number(t.otroCampo),s=number(t.sinCambio),den=number(t.filas)-number(t.noEncontrado)-number(t.invalido);
- const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',den?`${Math.round((v+o)/den*100)}%`:'—','number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',s+number(t.noAplicaConCambio),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
+ const t=item.totales||{},o=number(t.otroCampo),s=number(t.sinCambio);
+ const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',confirma(t),'number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',s+number(t.noAplicaConCambio),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
  }
  $('polygon-count').textContent=`${visible.length} de ${items.length} polígonos`;

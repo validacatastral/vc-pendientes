@@ -27,7 +27,7 @@ Contrato de lectura:
 - `GET API_URL?api=pendientes`: lista de `{poligono, publicado, antes, despues, totales}`.
 - `GET API_URL?api=pendientes&pol=<poligono>`: `{poligono, publicado, antes, despues, totales, porValidador, porTecnico, filas}`.
 - Cada fila contiene `{poligono, tecnico, hoja, validador, fi, codigo, smz, piso, estado, resultado, campos, obs}`. `codigo` es el CRC. Enviar identificadores como cadenas para conservar ceros iniciales.
-- `totales` contiene `verificado`, `otroCampo`, `sinCambio`, `noAplica` y, opcionalmente, `pendientes`. Si no viene `pendientes`, se calcula como `sinCambio + noAplica`. La tarjeta muestra ese número y, aparte, los avisos `otroCampo` (por ejemplo `41 · ◐ 18`). “SICUN confirma” = `verificado / (verificado + otroCampo + sinCambio)`; sin denominador se muestra `—`.
+- `totales` contiene `verificado`, `otroCampo`, `sinCambio`, `noAplica` y, opcionalmente, `pendientes`. Si no viene `pendientes`, se calcula como `sinCambio + noAplica`. La tarjeta muestra ese número y, aparte, los avisos `otroCampo` (por ejemplo `41 · ◐ 18`). “SICUN confirma” = `verificado / (filas − noEncontrado − invalido)`; `otroCampo` no cuenta como confirmado (cambió otro campo, no el observado). Sin denominador se muestra `—`.
 - `resultado` admite etiquetas legibles o claves equivalentes como `sinCambio`, `noAplica`, `otroCampo` y `verificado`; se normalizan mayúsculas, espacios, acentos y símbolos. `noAplica` representa NO APLICA con cambio en SICUN. Otros resultados se muestran en la opción “Todos los resultados”. Los chips cuentan pendientes a partir de las filas, independientemente del resto de filtros.
 
 ## Uso
