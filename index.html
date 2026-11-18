@@ -11,12 +11,12 @@
 <style>
 :root{color-scheme:light;--bg:#f3f2ee;--panel:#fffefa;--ink:#292e2b;--muted:#666c65;--line:#d8dbd2;--green:#476c56;--ochre:#896926;--brick:#a25243;--soft:#e9ece5}
 :root[data-theme=dark]{color-scheme:dark;--bg:#191d1b;--panel:#222824;--ink:#e5e8df;--muted:#afb7ac;--line:#414a41;--green:#a0c0a5;--ochre:#d2b575;--brick:#dda291;--soft:#303831}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,sans-serif}button,input,select{font:inherit;color:inherit}button,a,input,select{touch-action:manipulation}button{cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:9px 13px}button:hover{border-color:var(--green)}button:disabled{cursor:default;opacity:.5}a{color:var(--green)}:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}header{border-bottom:1px solid var(--line);background:var(--panel)}.top{max-width:1440px;margin:auto;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-size:12px;font-weight:700;letter-spacing:.12em}main{max-width:1440px;margin:auto;padding:40px 28px 64px}h1,h2,h3{font-family:'Inter Tight',Inter,sans-serif;line-height:1.15;margin:0 0 14px}h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.035em}h2{font-size:28px}h3{font-size:22px}.muted{color:var(--muted)}.intro{max-width:720px;margin-bottom:30px}.eyebrow{color:var(--green);text-transform:uppercase;font-size:11px;letter-spacing:.15em;font-weight:700;margin-bottom:12px}.mono,.number{font-family:'JetBrains Mono',monospace}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}.card,.notice,.filters{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px}.card{border-top:3px solid var(--green)}.card p{margin:8px 0}.metrics{display:flex;justify-content:space-between;gap:12px;border-block:1px solid var(--line);padding:18px 0;margin:18px 0}.number{font-size:29px;line-height:1.3}.green{color:var(--green)}.ochre{color:var(--ochre)}.brick{color:var(--brick)}.small{font-size:12px}.wide{width:100%}.detail-head,.list-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:22px 0}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip[aria-pressed=true]{background:var(--green);color:var(--bg);border-color:var(--green)}.chip span{font-family:'JetBrains Mono',monospace;margin-left:8px}.filters{margin:20px 0;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}label{display:block;font-size:12px;font-weight:600}select,input{display:block;width:100%;min-width:0;margin-top:6px;padding:11px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.notice{color:var(--muted);line-height:1.8}.table-wrap{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th{text-align:left;font-weight:600;color:var(--muted);background:var(--soft)}td,th{padding:13px 10px;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}td{max-width:210px}td button{font-size:11px;margin-top:7px;padding:5px 8px;display:block}tr:last-child td{border-bottom:0}.badge{font-weight:600}.empty{text-align:center;padding:36px}.status{min-height:24px;color:var(--green);margin:8px 0}footer{border-top:1px solid var(--line);padding:24px 28px;color:var(--muted);font-size:12px}[hidden]{display:none!important}
-@media(max-width:700px){.top{padding:16px}.brand{font-size:10px;max-width:210px}main{padding:28px 16px 40px}.filters{grid-template-columns:1fr;padding:18px}.card,.notice{padding:18px}.table-wrap{border:0;background:none;overflow:visible}table,tbody{display:block;width:100%}thead{display:none}tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:9px;margin-bottom:14px;padding:18px}td{display:block;padding:0;border:0;max-width:none;min-width:0}td:before{content:attr(data-label);display:block;color:var(--muted);font:500 10px Inter,sans-serif;margin-bottom:4px}td:nth-child(n+8){grid-column:1/-1}button{max-width:100%;overflow-wrap:anywhere}.chips{gap:6px}.chip{font-size:12px}.mono{overflow-wrap:anywhere}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,sans-serif}button,input,select{font:inherit;color:inherit}button,a,input,select{touch-action:manipulation}button{cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:9px 13px}button:hover{border-color:var(--green)}button:disabled{cursor:default;opacity:.5}a{color:var(--green)}:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}header{border-bottom:1px solid var(--line);background:var(--panel)}.top{max-width:1440px;margin:auto;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-size:12px;font-weight:700;letter-spacing:.12em}main{max-width:1440px;margin:auto;padding:40px 28px 64px}h1,h2,h3{font-family:'Inter Tight',Inter,sans-serif;line-height:1.15;margin:0 0 14px}h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.035em}h2{font-size:28px}h3{font-size:22px}.muted{color:var(--muted)}.intro{max-width:720px;margin-bottom:30px}.eyebrow{color:var(--green);text-transform:uppercase;font-size:11px;letter-spacing:.15em;font-weight:700;margin-bottom:12px}.mono,.number{font-family:'JetBrains Mono',monospace}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}.card,.notice,.filters{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px}.card{border-top:3px solid var(--green)}.card p{margin:8px 0}.metrics{display:flex;justify-content:space-between;gap:12px;border-block:1px solid var(--line);padding:18px 0;margin:18px 0}.number{font-size:29px;line-height:1.3}.green{color:var(--green)}.ochre{color:var(--ochre)}.brick{color:var(--brick)}.small{font-size:12px}.wide{width:100%}.detail-head,.list-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:22px 0}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip[aria-pressed=true]{background:var(--green);color:var(--bg);border-color:var(--green)}.chip span{font-family:'JetBrains Mono',monospace;margin-left:8px}.filters{margin:20px 0;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}label{display:block;font-size:12px;font-weight:600}select,input{display:block;width:100%;min-width:0;margin-top:6px;padding:11px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.notice{color:var(--muted);line-height:1.8}.table-wrap{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th{text-align:left;font-weight:600;color:var(--muted);background:var(--soft)}td,th{padding:13px 10px;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}td{max-width:210px}td button{font-size:11px;margin-top:7px;padding:5px 8px;display:block}tr:last-child td{border-bottom:0}.badge{font-weight:600}.empty{text-align:center;padding:36px}.status{min-height:24px;color:var(--green);margin:8px 0}footer{border-top:1px solid var(--line);padding:24px 28px;color:var(--muted);font-size:12px}[hidden]{display:none!important}.actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.fix{border-top-color:var(--ochre);margin:20px 0}.fix .list-head{margin:0 0 4px}.fix h3{margin:0 0 4px}.fix td{max-width:none}
+@media(max-width:700px){.top{padding:16px}.brand{font-size:10px;max-width:210px}main{padding:28px 16px 40px}.filters{grid-template-columns:1fr;padding:18px}.card,.notice{padding:18px}.table-wrap{border:0;background:none;overflow:visible}table,tbody{display:block;width:100%}thead{display:none}tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:9px;margin-bottom:14px;padding:18px}td{display:block;padding:0;border:0;max-width:none;min-width:0}td:before{content:attr(data-label);display:block;color:var(--muted);font:500 10px Inter,sans-serif;margin-bottom:4px}td:nth-child(n+8),.fix td:nth-child(3){grid-column:1/-1}button{max-width:100%;overflow-wrap:anywhere}.chips{gap:6px}.chip{font-size:12px}.mono{overflow-wrap:anywhere}}
 </style>
 </head>
 <body>
-<header><div class="top"><div class="brand">VALIDA CATASTRAL · PENDIENTES SICUN</div><button id="theme" type="button" aria-label="Cambiar tema">Tema oscuro</button></div></header>
+<header><div class="top"><div class="brand">VALIDA CATASTRAL · PENDIENTES SICUN</div><div class="actions"><span id="refresh-status" class="small muted" role="status" aria-live="polite"></span><button id="refresh" type="button">↻ Actualizar</button><button id="theme" type="button" aria-label="Cambiar tema">Tema oscuro</button></div></div></header>
 <main>
 <div class="intro"><div class="eyebrow">Seguimiento de validación · Solo lectura</div><h1>Pendientes de revisión</h1><p class="muted">Consulta el cruce de tu Excel de validación con SICUN. Este aviso te ayuda a identificar las filas que todavía requieren atención.</p></div>
 <div id="message" class="notice" role="status">Cargando publicaciones…</div>
@@ -33,6 +33,7 @@
 <div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
 <div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
 <p id="explanation" class="notice"></p>
+<section id="arreglos" class="card fix" aria-labelledby="arreglos-title" hidden><div class="list-head"><div><h3 id="arreglos-title">Arreglos en el Word</h3><span id="arreglos-revisado" class="muted small"></span></div><button id="copy-arreglos" type="button">Copiar CRC</button></div><p class="muted small">Se arregla a mano en el Word; desaparece al volver a pasar Revisar Word.</p><div id="arreglos-status" class="status" role="status" aria-live="polite"></div><div class="table-wrap"><table><thead><tr><th>Sección</th><th>CRC</th><th>Qué hacer</th></tr></thead><tbody id="arreglos-rows"></tbody></table></div></section>
 <div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button></span></div>
 <div id="copy-status" class="status" role="status" aria-live="polite"></div>
 <div class="table-wrap"><table><thead><tr><th>Técnico</th><th>Validador</th><th>FI</th><th>CRC</th><th>Sec-Mz-Lt</th><th>Piso</th><th>Marcó</th><th>Resultado SICUN</th><th>Campos que cambiaron</th><th>Observación</th></tr></thead><tbody id="rows"></tbody></table></div>
@@ -43,7 +44,7 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbwcXmwvdy0D5ROteOFL9z_fbmelZhE11bgG_nS7McpqDXzlTa28KHd6EgnUChisjZjF/exec';
 'use strict';
 const $ = id => document.getElementById(id);
-const state = {data:null, visible:[], request:0, items:[], districts:new Map(), districtJob:null};
+const state = {data:null, visible:[], request:0, items:[], districts:new Map(), districtJob:null, refreshing:false};
 const str = value => value == null ? '' : typeof value === 'object' ? (Array.isArray(value) ? value.map(str).join(', ') : Object.entries(value).map(([k,v]) => `${k}: ${str(v)}`).join(', ')) : String(value);
 const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function category(row){
@@ -63,8 +64,8 @@ $('theme').onclick=()=>{const value=document.documentElement.dataset.theme==='da
 function route(){const p=new URLSearchParams(location.hash.slice(1));return {pol:p.get('pol')||'',tec:p.get('tec')||''};}
 function navigate(pol='',tec=''){const p=new URLSearchParams();if(pol)p.set('pol',pol);if(tec)p.set('tec',tec);const hash=p.toString();if(location.hash.slice(1)===hash)load();else location.hash=hash;}
 function message(text){$('message').textContent=text;$('message').hidden=false;}
-async function api(pol){
- const url=new URL(API_URL);url.searchParams.set('api','pendientes');if(pol)url.searchParams.set('pol',pol);
+async function api(pol,fresh){
+ const url=new URL(API_URL);url.searchParams.set('api','pendientes');if(pol)url.searchParams.set('pol',pol);if(fresh)url.searchParams.set('_',String(Date.now()));
  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);
  try{const res=await fetch(url,{signal:controller.signal,cache:'no-store',credentials:'omit'});if(!res.ok)throw Error('HTTP '+res.status);return await res.json();}finally{clearTimeout(timer);}
 }
@@ -131,6 +132,7 @@ function renderHome(items){
  for(const item of visible){
  const card=node('article',undefined,'card');card.append(node('div','POLÍGONO','eyebrow'),node('h3',item.poligono,'mono'),node('p',`Publicado: ${str(item.publicado)||'Sin fecha'}`,'muted small'),node('p',`${str(item.antes)||'—'} → ${str(item.despues)||'—'}`,'mono small'));
  if(item.parcial===true)card.append(node('p',`parcial${str(item.parcialDetalle).trim()?' · falta '+str(item.parcialDetalle):''}`,'ochre small'));
+ const fixes=number(item.arreglos);if(fixes>0)card.append(node('p',`🛠 ${fixes} ${fixes===1?'arreglo':'arreglos'} en el Word`,'ochre small'));
  const t=item.totales||{},o=number(t.otroCampo),s=number(t.sinCambio);
  const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',confirma(t),'number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',s+number(t.noAplicaConCambio),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
@@ -148,14 +150,28 @@ function renderHome(items){
  $('district-status').hidden=!unknown;
  $('home').hidden=false;
 }
-function renderDetail(data){
+/* Arreglos en el Word: los marca Revisar Word; se corrigen a mano y desaparecen al volver a pasarlo. */
+const fixItems=data=>{const a=data&&data.arreglos;return a&&Array.isArray(a.items)?a.items.filter(i=>i&&typeof i==='object'):[];};
+const fixCrc=item=>str(item.crc??item.codigo).trim();
+function renderArreglos(data){
+ const items=fixItems(data),crcs=[...new Set(items.map(fixCrc).filter(Boolean))];
+ $('arreglos').hidden=!items.length;$('arreglos-rows').replaceChildren();$('arreglos-status').textContent='';
+ $('arreglos-revisado').textContent=items.length?`Revisado ${str(data.arreglos.revisado)||'sin fecha'}`:'';
+ for(const item of items){const tr=node('tr');for(const [label,value,cls] of [['Sección',item.seccion,''],['CRC',fixCrc(item),'mono'],['Qué hacer',item.que,'']]){const td=node('td',str(value)||'—',cls);td.dataset.label=label;tr.append(td);}$('arreglos-rows').append(tr);}
+ $('copy-arreglos').disabled=!crcs.length;$('copy-arreglos').onclick=()=>copy(crcs.join('\n'),$('arreglos-status'));
+}
+function renderDetail(data,keep){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
  $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`;
  const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
  $('chips').replaceChildren();
  for(const tec of ['',...technicians.filter(Boolean)]){const b=node('button',tec||'Todos','chip');b.type='button';b.dataset.tec=tec;b.append(node('span',data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&pending(r)).length));b.onclick=()=>navigate(route().pol,tec);$('chips').append(b);}
  $('validator').replaceChildren(new Option('Todos los validadores',''));for(const v of [...new Set(data.filas.map(r=>str(r.validador)))].filter(Boolean).sort())$('validator').add(new Option(v,v));
- $('result').value='pending';$('search').value='';$('detail').hidden=false;filter();
+ if(keep){ // ↻ Actualizar: conservar técnico, resultado, validador y búsqueda si siguen siendo válidos
+  const {pol,tec}=route();if(tec&&!technicians.includes(tec))history.replaceState(null,'','#'+new URLSearchParams({pol}));
+  $('result').value=keep.result;$('validator').value=[...$('validator').options].some(o=>o.value===keep.validator)?keep.validator:'';$('search').value=keep.search;
+ }else{$('result').value='pending';$('search').value='';}
+ renderArreglos(data);$('detail').hidden=false;filter();
 }
 const COLUMNS=['Técnico','Validador','FI','CRC','Sec-Mz-Lt','Piso','Marcó','Resultado SICUN','Campos que cambiaron','Observación'];
 function rowValues(row){return [row.tecnico,row.validador,row.fi,row.codigo,row.smz,row.piso,row.estado,row.resultado,row.campos,row.obs];}
@@ -166,7 +182,7 @@ function filter(){
  state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));$('download-xlsx').disabled=!rows.length;$('copy-status').textContent='';
  for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
 }
-async function copy(text){try{await navigator.clipboard.writeText(text);$('copy-status').textContent='Copiado al portapapeles.';}catch{$('copy-status').textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
+async function copy(text,out=$('copy-status')){try{await navigator.clipboard.writeText(text);out.textContent='Copiado al portapapeles.';}catch{out.textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
 /* Descargar Excel: filas visibles con las columnas de la tabla. XLSX mínimo sin librerías (ZIP sin compresión);
    todas las celdas van como texto (inlineStr + formato @) para que CRC y FI conserven sus 24 dígitos y ceros, sin notación científica. */
@@ -207,15 +223,45 @@ $('download-xlsx').onclick=()=>{
 };
 $('back').onclick=()=>navigate();$('result').onchange=filter;$('validator').onchange=filter;$('search').oninput=filter;
 $('district').onchange=filterHome;$('polygon-search').oninput=filterHome;$('polygon-order').onchange=filterHome;
+function readView(data,pol){ // valida la respuesta; null = el polígono no tiene publicación
+ if(pol){if(data&&data.ok===false)return null;if(!data||!Array.isArray(data.filas)||str(data.poligono)!==pol)throw Error('Formato inválido');return data;}
+ const items = Array.isArray(data) ? data : (data && Array.isArray(data.poligonos) ? data.poligonos : null);
+ if((data&&data.ok===false)||items===null||items.some(i=>!i||!i.poligono))throw Error('Formato inválido');
+ return items;
+}
+function showView(pol,view,keep){$('message').hidden=true;if(pol){state.data=view;state.districts.set(pol,district(view));renderDetail(view,keep);}else{state.data=null;state.items=view;renderHome(view);resolveDistricts();}}
+function loadError(){message('No se pudo cargar la publicación de pendientes. Verifica la conexión y que la API esté publicada y accesible.');const retry=node('button','Reintentar');retry.type='button';retry.style.marginLeft='12px';retry.onclick=load;$('message').append(retry);}
+function refreshStatus(text,error){$('refresh-status').textContent=text;$('refresh-status').className='small '+(error?'brick':'muted');}
 async function load(){
  const id=++state.request,{pol}=route();$('copy-status').textContent='';
  if(pol&&state.data&&str(state.data.poligono)===pol){$('message').hidden=true;$('home').hidden=true;$('detail').hidden=false;filter();return;}
- $('home').hidden=true;$('detail').hidden=true;
+ $('home').hidden=true;$('detail').hidden=true;refreshStatus('');
  if(!API_URL.trim()||API_URL==='PEGAR_AQUI_URL_EXEC'){message('La API de pendientes todavía no está configurada. Rodrigo debe completar API_URL con la URL /exec del comparador.');return;}
  message('Cargando publicación…');
- try{const data=await api(pol);if(id!==state.request)return;if(pol){if(data&&data.ok===false){message('Este polígono no tiene publicación');return;}if(!data||!Array.isArray(data.filas)||str(data.poligono)!==pol)throw Error('Formato inválido');state.data=data;state.districts.set(pol,district(data));$('message').hidden=true;renderDetail(data);}else{const items = Array.isArray(data) ? data : (data && Array.isArray(data.poligonos) ? data.poligonos : null);if((data&&data.ok===false)||items===null||items.some(i=>!i||!i.poligono))throw Error('Formato inválido');state.data=null;state.items=items;$('message').hidden=true;renderHome(items);resolveDistricts();}}
- catch{if(id!==state.request)return;message('No se pudo cargar la publicación de pendientes. Verifica la conexión y que la API esté publicada y accesible.');const retry=node('button','Reintentar');retry.type='button';retry.style.marginLeft='12px';retry.onclick=load;$('message').append(retry);}
+ try{const data=await api(pol);if(id!==state.request)return;const view=readView(data,pol);if(!view){message('Este polígono no tiene publicación');return;}showView(pol,view);}
+ catch{if(id!==state.request)return;loadError();}
 }
+/* ↻ Actualizar: vuelve a leer la vista actual sin recargar la página ni usar state.data (fetch forzado, con _=<timestamp>).
+   Si falla se conservan los datos que ya se ven; una respuesta vieja se descarta por state.request. */
+const clock=d=>[d.getHours(),d.getMinutes()].map(n=>String(n).padStart(2,'0')).join(':');
+async function refresh(){
+ if(state.refreshing)return;
+ if(!API_URL.trim()||API_URL==='PEGAR_AQUI_URL_EXEC'){load();return;}
+ const id=++state.request,{pol}=route(),shown=!$(pol?'detail':'home').hidden;
+ state.refreshing=true;$('refresh').disabled=true;$('refresh').textContent='Actualizando…';refreshStatus('');
+ try{
+  const view=readView(await api(pol,true),pol);if(id!==state.request)return;
+  if(!view){if(!shown){message('Este polígono no tiene publicación');return;}throw Error('el polígono ya no tiene publicación');}
+  const keep=pol&&shown?{result:$('result').value,validator:$('validator').value,search:$('search').value}:undefined;
+  showView(pol,view,keep);refreshStatus(`Leído ${clock(new Date())}`);
+ }catch(e){
+  if(id!==state.request)return;
+  const why=e&&e.name==='AbortError'?'tiempo agotado':/^(HTTP|Formato|el polígono)/.test(e&&e.message)?e.message:'sin conexión con la API';
+  refreshStatus(`No se pudo actualizar (${why}).${shown?' Se mantienen los datos anteriores.':''}`,true);
+  if(!shown)loadError();
+ }finally{state.refreshing=false;$('refresh').disabled=false;$('refresh').textContent='↻ Actualizar';}
+}
+$('refresh').onclick=refresh;
 window.addEventListener('hashchange',load);load();
 </script>
 </body>
