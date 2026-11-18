@@ -28,6 +28,8 @@ Contrato de lectura:
 - `GET API_URL?api=pendientes&pol=<poligono>`: `{poligono, publicado, antes, despues, totales, porValidador, porTecnico, filas}`.
 - Cada fila contiene `{poligono, tecnico, hoja, validador, fi, codigo, smz, piso, estado, resultado, campos, obs}`. `codigo` es el CRC. Enviar identificadores como cadenas para conservar ceros iniciales.
 - `totales` contiene `verificado`, `otroCampo`, `sinCambio`, `noAplica` y, opcionalmente, `pendientes`. Si no viene `pendientes`, se calcula como `sinCambio + noAplica`. La tarjeta muestra ese número y, aparte, los avisos `otroCampo` (por ejemplo `41 · ◐ 18`). “SICUN confirma” = `verificado / (filas − noEncontrado − invalido)`; `otroCampo` no cuenta como confirmado (cambió otro campo, no el observado). Sin denominador se muestra `—`.
+- Opcional `arreglos` en el detalle: `{revisado, items:[{seccion, crc, que}]}` (para el CRC también se acepta `codigo`). Son los arreglos que marca Revisar Word. Si `items` trae al menos uno, arriba de la tabla de pendientes aparece la tarjeta “Arreglos en el Word” con “Revisado <revisado>”, la tabla Sección · CRC · Qué hacer y un botón “Copiar CRC” (los CRC de la tarjeta, sin repetir, uno por línea). Se arreglan a mano en el Word y desaparecen al volver a pasar Revisar Word. Si `arreglos` es `null`, no viene (API anterior) o está vacío, la tarjeta no aparece. Funciona aunque `filas` venga vacío.
+- Opcional `arreglos` en el listado: número. Si es mayor que 0, la tarjeta del polígono muestra `🛠 N arreglos en el Word`; si no viene, no se muestra nada.
 - `resultado` admite etiquetas legibles o claves equivalentes como `sinCambio`, `noAplica`, `otroCampo` y `verificado`; se normalizan mayúsculas, espacios, acentos y símbolos. `noAplica` representa NO APLICA con cambio en SICUN. Otros resultados se muestran en la opción “Todos los resultados”. Los chips cuentan pendientes a partir de las filas, independientemente del resto de filtros.
 
 ## Uso
@@ -38,9 +40,17 @@ Si el listado incluye `parcial: true`, la tarjeta muestra `parcial · falta X`, 
 
 Abrir un polígono y seleccionar un técnico. Por defecto se muestran SIN CAMBIO EN SICUN, NO APLICA pero SICUN cambió y, como aviso, ◐ Cambió otro campo, no el observado (marcó APLICA y SICUN cambió, pero ningún campo esperado del validador). Los filtros de resultado, validador y CRC se combinan. “Copiar lista” copia los CRC de las filas visibles, uno por línea; cada fila también permite copiar su CRC. “Descargar Excel” baja `pendientes_<poligono>_<AAMMDD>.xlsx` con las filas visibles y las mismas columnas de la tabla; todas las celdas van como texto, así CRC y FI conservan sus 24 dígitos (sin notación científica). El portapapeles requiere HTTPS o localhost y permiso del navegador; si falla se informa en la página.
 
+El botón “↻ Actualizar” de la cabecera (junto al de tema) vuelve a leer la vista actual, portada o polígono, sin recargar la página: siempre consulta la API (no usa lo ya cargado) y agrega `_=<timestamp>` a la URL para evitar caché. Mientras carga queda deshabilitado con “Actualizando…” y al terminar muestra “Leído HH:MM” (hora local). En el detalle conserva técnico, Resultado, Validador y búsqueda si siguen siendo válidos (un técnico o validador que ya no aparece se descarta); en la portada se mantienen los filtros guardados. Si falla, se siguen viendo los datos anteriores y el error aparece junto al botón. Si mientras tanto se cambia de vista, la respuesta se descarta.
+
 El fragmento de URL conserva polígono y técnico, por ejemplo `#pol=260210019&tec=CRISTINA`. Los enlaces directos abren el polígono independientemente del distrito o búsqueda guardados. Se pueden compartir enlaces directos y usar atrás/adelante del navegador. En pantallas de hasta 700 px, las filas se presentan como tarjetas.
 
 ## Verificación local
+
+Pruebas sin navegador ni dependencias (Node 22+), con datos sintéticos:
+
+```bash
+for t in tests/*.test.js; do node "$t"; done
+```
 
 Servir con `python3 -m http.server 8000` y abrir `http://localhost:8000`. Para probar datos, usar interceptación de red en un navegador automatizado o un mock local temporal y una copia de `index.html` con la URL del mock. Mantener los mocks fuera del repositorio y usar únicamente identificadores sintéticos.
 
