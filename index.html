@@ -49,14 +49,14 @@ const str = value => value == null ? '' : typeof value === 'object' ? (Array.isA
 const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function category(row){
  const r = norm(row.resultado);
- if(r.startsWith('CAMBIOOTRAUNIDAD')||r==='OTRAUNIDAD') return 'otraUnidad'; // aviso aparte: no es pendiente ni confirmado; trae CRC y campos en el resultado
+ if(r.startsWith('CAMBIOOTRAUNIDAD')||r==='OTRAUNIDAD') return 'otraUnidad'; // aviso: en la lista de pendientes, pero fuera de pendingTotal y confirma(); trae CRC y campos en el resultado
  if(r.includes('NOAPLICA') || (norm(row.estado)==='NOAPLICA' && /CAMBIO|VERIFICADO|OTROCAMPO/.test(r) && !r.includes('SINCAMBIO'))) return 'noAplica';
  if(r.includes('SINCAMBIO')) return 'sinCambio';
  if(r.includes('OTROCAMPO')) return 'otroCampo';
  if(r.includes('VERIFICADO')) return 'verificado';
  return 'neutral';
 }
-const pending = row => ['sinCambio','noAplica','otroCampo'].includes(category(row));
+const pending = row => ['sinCambio','noAplica','otroCampo','otraUnidad'].includes(category(row)); // lista por defecto y chips; otraUnidad NO suma a pendingTotal ni a confirma()
 function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=str(text);if(cls)e.className=cls;return e;}
 function theme(value){document.documentElement.dataset.theme=value;$('theme').textContent=value==='dark'?'Tema claro':'Tema oscuro';$('theme').setAttribute('aria-pressed',String(value==='dark'));}
 let saved;try{saved=localStorage.getItem('vc-pend-theme');}catch{}
@@ -163,7 +163,7 @@ function renderArreglos(data){
  $('copy-arreglos').disabled=!crcs.length;$('copy-arreglos').onclick=()=>copy(crcs.join('\n'),$('arreglos-status'));
 }
 /* ◐ otra unidad del lote: total aparte (publicaciones nuevas). Sin totales.otraUnidad (publicaciones viejas) o en 0 no se muestra nada. */
-function otraUnidadTexto(t){const u=number((t||{}).otraUnidad);return u?` ◐ ${u} otra unidad del lote = SICUN no cambió la unidad marcada, pero sí otra unidad (CRC) del mismo lote; el CRC y los campos están en Resultado SICUN (filtro «◐ Cambió otra unidad del lote»). No cuenta en Pendientes ni en SICUN confirma.`:'';}
+function otraUnidadTexto(t){const u=number((t||{}).otraUnidad);return u?` ◐ ${u} otra unidad del lote = SICUN no cambió la unidad marcada, pero sí otra unidad (CRC) del mismo lote; el CRC y los campos están en Resultado SICUN (filtro «◐ Cambió otra unidad del lote»). Aparece en la lista, pero no suma al número de Pendientes ni a SICUN confirma.`:'';}
 function renderDetail(data,keep){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
  $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);

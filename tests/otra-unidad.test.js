@@ -1,4 +1,5 @@
-/* "◐ Cambió otra unidad del lote" (totales.otraUnidad): dato aparte en la tarjeta y en el detalle; NO suma a Pendientes ni a "SICUN confirma".
+/* "◐ Cambió otra unidad del lote" (totales.otraUnidad): dato aparte en la tarjeta y en el detalle; sus filas SÍ salen en la vista por defecto y en los chips,
+   pero NO suman a pendingTotal ni a "SICUN confirma".
    Publicaciones viejas (sin totales.otraUnidad) no muestran nada. Datos sintéticos (solo conteos). Uso: node tests/otra-unidad.test.js */
 'use strict';
 var fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
@@ -9,13 +10,14 @@ var T=vm.runInNewContext([cut('const str = value','\nfunction node('),cut('funct
 var U2='150112350070090101020017';
 function tot(o){return Object.assign({filas:100,verificado:40,otroCampo:5,sinCambio:30,noEncontrado:6,invalido:4,noAplicaConCambio:15},o);}
 
-// 1) Categoría propia (con el detalle que publica el comparador y con la clave); no es pendiente ni verificado
+// 1) Categoría propia (con el detalle que publica el comparador y con la clave); entra en la vista "Pendientes de atención" y en los chips
 ['◐ Cambió otra unidad del lote · '+U2+' (UA · Condición del Titular)','◐ Cambió otra unidad del lote · Posible renumeración: '+U2,'◐ CAMBIÓ OTRA UNIDAD DEL LOTE','otraUnidad'].forEach(function(r){
-  assert.strictEqual(T.category({resultado:r,estado:'APLICA'}),'otraUnidad',r);assert.strictEqual(T.pending({resultado:r,estado:'APLICA'}),false,r);});
-// las demás categorías no cambian
+  assert.strictEqual(T.category({resultado:r,estado:'APLICA'}),'otraUnidad',r);assert.strictEqual(T.pending({resultado:r,estado:'APLICA'}),true,r);});
+// las demás categorías no cambian (✔ sigue fuera de pendientes)
+assert.strictEqual(T.pending({resultado:'✔ VERIFICADO',estado:'APLICA'}),false);
 [['⚠ SIN CAMBIO EN SICUN','sinCambio'],['ℹ NO APLICA pero SICUN cambió','noAplica'],['◐ Cambió otro campo, no el observado','otroCampo'],['✔ VERIFICADO','verificado']].forEach(function(c){assert.strictEqual(T.category({resultado:c[0],estado:'APLICA'}),c[1],c[0]);});
 
-// 2) No suma a Pendientes ni a SICUN confirma
+// 2) Aunque se liste, no suma a pendingTotal (número de la tarjeta) ni a SICUN confirma
 assert.strictEqual(T.pendingTotal({totales:tot({otraUnidad:7})}),T.pendingTotal({totales:tot()}));assert.strictEqual(T.pendingTotal({totales:tot()}),45);
 assert.strictEqual(T.confirma(tot({otraUnidad:7})),T.confirma(tot()));assert.strictEqual(T.confirma(tot()),'44%');
 
@@ -27,4 +29,6 @@ assert(/^ ◐ 3 otra unidad del lote = /.test(T.otraUnidadTexto(tot({otraUnidad:
 assert(/const u=number\(t\.otraUnidad\);if\(u\)card\.append\(node\('p',`◐ \$\{u\} otra unidad del lote`,'ochre small'\)\)/.test(html));
 assert(/<option value="otraUnidad">◐ Cambió otra unidad del lote<\/option>/.test(html));assert(/otraUnidad:'ochre'/.test(html));
 assert(/\+otraUnidadTexto\(data\.totales\);/.test(html));
-console.log('ok otra unidad del lote: categoría propia, aparte de Pendientes y SICUN confirma, nada en publicaciones viejas');
+// chips y vista por defecto usan pending()
+assert(/&&pending\(r\)\)\.length/.test(html),'chips cuentan con pending()');assert(/result==='pending'\?pending\(r\)/.test(html),'vista por defecto usa pending()');
+console.log('ok otra unidad del lote: en la vista por defecto y chips, fuera de pendingTotal y SICUN confirma, filtro propio, nada en publicaciones viejas');
