@@ -34,7 +34,7 @@
 <div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
 <p id="explanation" class="notice"></p>
 <section id="arreglos" class="card fix" aria-labelledby="arreglos-title" hidden><div class="list-head"><div><h3 id="arreglos-title">Arreglos en el Word</h3><span id="arreglos-revisado" class="muted small"></span></div><button id="copy-arreglos" type="button">Copiar CRC</button></div><p class="muted small">Se arregla a mano en el Word; desaparece al volver a pasar Revisar Word.</p><div id="arreglos-status" class="status" role="status" aria-live="polite"></div><div class="table-wrap"><table><thead><tr><th>Sección</th><th>CRC</th><th>Qué hacer</th></tr></thead><tbody id="arreglos-rows"></tbody></table></div></section>
-<div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button><button id="download-report" type="button" hidden>Descargar reporte completo</button></span></div>
+<div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button></span></div>
 <div id="copy-status" class="status" role="status" aria-live="polite"></div>
 <div class="table-wrap"><table><thead><tr><th>Técnico</th><th>Validador</th><th>FI</th><th>CRC</th><th>Sec-Mz-Lt</th><th>Piso</th><th>Marcó</th><th>Resultado SICUN</th><th>Campos que cambiaron</th><th>Observación</th></tr></thead><tbody id="rows"></tbody></table></div>
 <p id="empty" class="notice empty" hidden>No hay filas para estos filtros.</p>
@@ -164,11 +164,16 @@ function renderArreglos(data){
 }
 /* ◐ otra unidad del lote: total aparte (publicaciones nuevas). Sin totales.otraUnidad (publicaciones viejas) o en 0 no se muestra nada. */
 function otraUnidadTexto(t){const u=number((t||{}).otraUnidad);return u?` ◐ ${u} otra unidad del lote = SICUN no cambió la unidad marcada, pero sí otra unidad (CRC) del mismo lote; el CRC y los campos están en Resultado SICUN (filtro «◐ Cambió otra unidad del lote»). Aparece en la lista, pero no suma al número de Pendientes ni a SICUN confirma.`:'';}
+let downloadingReport=null;
+function hasReport(data){
+ return data.reporte===true||state.items.some(item=>str(item.poligono)===str(data.poligono)&&item.reporte===true);
+}
+function updateExcelButton(){
+ const button=$('download-xlsx'),busy=downloadingReport===state.data;
+ button.disabled=busy||(!state.visible.length&&!hasReport(state.data));
+ button.textContent=busy?'Descargando…':'Descargar Excel';
+}
 function renderDetail(data,keep){
- const report=$('download-report');
- const listed=state.items.find(item=>str(item.poligono)===str(data.poligono));
- report.hidden=(data.reporte===undefined?listed?.reporte:data.reporte)!==true;
- report.disabled=false;report.textContent='Descargar reporte completo';
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
  $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);
  const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
@@ -187,30 +192,11 @@ function filter(){
  if(!state.data)return;const {tec}=route(),result=$('result').value,validator=$('validator').value,search=$('search').value.trim().toUpperCase();
  for(const b of $('chips').children)b.setAttribute('aria-pressed',String(b.dataset.tec===tec));
  const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&str(r.codigo).toUpperCase().includes(search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
- state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));$('download-xlsx').disabled=!rows.length;$('copy-status').textContent='';
+ state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));updateExcelButton();$('copy-status').textContent='';
  for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
 }
 async function copy(text,out=$('copy-status')){try{await navigator.clipboard.writeText(text);out.textContent='Copiado al portapapeles.';}catch{out.textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
-$('download-report').onclick=async()=>{
- const button=$('download-report'),data=state.data;
- if(!data||button.hidden||button.disabled)return;
- const pol=str(data.poligono),current=()=>state.data===data&&route().pol===pol;
- button.disabled=true;button.textContent='Descargando…';$('copy-status').textContent='';
- try{
-  const report=await api(pol,false,'reporte');
-  if(!current())return;
-  if(!report||report.ok===false||!report.base64){$('copy-status').textContent='Aún no hay reporte publicado';return;}
-  const bytes=Uint8Array.from(atob(report.base64),c=>c.charCodeAt(0));
-  const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
-  const link=node('a');link.href=url;link.download=`reporte_${pol}.xlsx`;
-  document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
- }catch(error){
-  if(current())$('copy-status').textContent=error.message==='HTTP 404'?'Aún no hay reporte publicado':'No se pudo descargar el reporte. Inténtalo de nuevo.';
- }finally{
-  if(state.data===data){button.disabled=false;button.textContent='Descargar reporte completo';}
- }
-};
 /* Descargar Excel: filas visibles con las columnas de la tabla. XLSX mínimo sin librerías (ZIP sin compresión);
    todas las celdas van como texto (inlineStr + formato @) para que CRC y FI conserven sus 24 dígitos y ceros, sin notación científica. */
 function xlsxName(pol,date){const p=n=>String(n).padStart(2,'0');return `pendientes_${str(pol).replace(/[^\w-]/g,'')}_${p(date.getFullYear()%100)}${p(date.getMonth()+1)}${p(date.getDate())}.xlsx`;}
@@ -242,10 +228,38 @@ function xlsxBytes(rows){
   ['xl/worksheets/sheet1.xml',`${X}<worksheet xmlns="${M}"><sheetData>${sheet}</sheetData></worksheet>`]
  ]);
 }
-$('download-xlsx').onclick=()=>{
- if(!state.data||!state.visible.length)return;
- const url=URL.createObjectURL(new Blob([xlsxBytes(state.visible)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
- const a=document.createElement('a');a.href=url;a.download=xlsxName(state.data.poligono,new Date());document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+function saveXlsx(bytes,name){
+ const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+ const link=node('a');link.href=url;link.download=name;
+ document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('download-xlsx').onclick=async()=>{
+ const data=state.data;
+ if(!data||$('download-xlsx').disabled)return;
+ if(hasReport(data)){
+  const pol=str(data.poligono),current=()=>state.data===data&&route().pol===pol;
+  downloadingReport=data;updateExcelButton();$('copy-status').textContent='';
+  try{
+   const report=await api(pol,false,'reporte');
+   if(!current())return;
+   if(report?.ok!==false&&report?.base64){
+    saveXlsx(Uint8Array.from(atob(report.base64),c=>c.charCodeAt(0)),`reporte_${pol}.xlsx`);
+    return;
+   }
+   if(report?.error||report?.message)throw Error(report.error||report.message);
+  }catch(error){
+   if(!current())return;
+   if(error.message!=='HTTP 404'&&!/sin[ _-]+reporte/i.test(error.message)){
+    $('copy-status').textContent='No se pudo descargar el reporte. Inténtalo de nuevo.';return;
+   }
+  }finally{
+   if(downloadingReport===data)downloadingReport=null;
+   if(state.data===data)updateExcelButton();
+  }
+  $('copy-status').textContent='Aún no hay reporte publicado';
+ }
+ if(!state.visible.length)return;
+ saveXlsx(xlsxBytes(state.visible),xlsxName(state.data.poligono,new Date()));
  $('copy-status').textContent=`Excel descargado: ${state.visible.length} ${state.visible.length===1?'fila':'filas'}.`;
 };
 $('back').onclick=()=>navigate();$('result').onchange=filter;$('validator').onchange=filter;$('search').oninput=filter;
