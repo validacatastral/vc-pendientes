@@ -31,7 +31,7 @@
 <button id="back" type="button">← Todos los polígonos</button>
 <div class="detail-head"><div><div class="eyebrow">Publicación <span id="published"></span></div><h2>Polígono <span id="polygon" class="mono"></span></h2></div><span class="muted">Selecciona tu nombre para revisar tus filas</span></div>
 <div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
-<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
+<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="sigueMal">◐ CAMBIÓ PERO SIGUE MAL</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
 <p id="explanation" class="notice"></p>
 <section id="arreglos" class="card fix" aria-labelledby="arreglos-title" hidden><div class="list-head"><div><h3 id="arreglos-title">Arreglos en el Word</h3><span id="arreglos-revisado" class="muted small"></span></div><button id="copy-arreglos" type="button">Copiar CRC</button></div><p class="muted small">Se arregla a mano en el Word; desaparece al volver a pasar Revisar Word.</p><div id="arreglos-status" class="status" role="status" aria-live="polite"></div><div class="table-wrap"><table><thead><tr><th>Sección</th><th>CRC</th><th>Qué hacer</th></tr></thead><tbody id="arreglos-rows"></tbody></table></div></section>
 <div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button></span></div>
@@ -49,6 +49,7 @@ const str = value => value == null ? '' : typeof value === 'object' ? (Array.isA
 const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function category(row){
  const r = norm(row.resultado);
+ if(r.startsWith('CAMBIOPEROSIGUEMAL')) return 'sigueMal';
  if(r.startsWith('CAMBIOOTRAUNIDAD')||r==='OTRAUNIDAD') return 'otraUnidad'; // aviso: en la lista de pendientes, pero fuera de pendingTotal y confirma(); trae CRC y campos en el resultado
  if(r.includes('NOAPLICA') || (norm(row.estado)==='NOAPLICA' && /CAMBIO|VERIFICADO|OTROCAMPO/.test(r) && !r.includes('SINCAMBIO'))) return 'noAplica';
  if(r.includes('SINCAMBIO')) return 'sinCambio';
@@ -56,7 +57,7 @@ function category(row){
  if(r.includes('VERIFICADO')) return 'verificado';
  return 'neutral';
 }
-const pending = row => ['sinCambio','noAplica','otroCampo','otraUnidad'].includes(category(row)); // lista por defecto y chips; otraUnidad NO suma a pendingTotal ni a confirma()
+const pending = row => ['sinCambio','noAplica','otroCampo','otraUnidad','sigueMal'].includes(category(row)); // lista por defecto y chips; otraUnidad NO suma a pendingTotal ni a confirma()
 function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=str(text);if(cls)e.className=cls;return e;}
 function theme(value){document.documentElement.dataset.theme=value;$('theme').textContent=value==='dark'?'Tema claro':'Tema oscuro';$('theme').setAttribute('aria-pressed',String(value==='dark'));}
 let saved;try{saved=localStorage.getItem('vc-pend-theme');}catch{}
@@ -93,7 +94,7 @@ function district(data){
 const itemDistrict=item=>district(item)||state.districts.get(str(item.poligono))||'';
 /* SICUN confirma: solo ✔ verificado sobre las filas cruzadas (sin no encontrado ni inválido). ◐ cambió otro campo NO cuenta como confirmado. */
 function confirma(t){t=t||{};const den=number(t.filas)-number(t.noEncontrado)-number(t.invalido);return den>0?`${Math.round(number(t.verificado)/den*100)}%`:'—';}
-const pendingTotal=item=>number((item.totales||{}).sinCambio)+number((item.totales||{}).noAplicaConCambio);
+const pendingTotal=item=>number((item.totales||{}).sinCambio)+number((item.totales||{}).noAplicaConCambio)+number((item.totales||{}).sigueMal);
 function publishedTime(value){
  const text=str(value).trim(),local=text.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?(?:[ ,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
  // El comparador también publica fechas en formato peruano; evitar interpretarlas como mm/dd.
@@ -134,9 +135,10 @@ function renderHome(items){
  const card=node('article',undefined,'card');card.append(node('div','POLÍGONO','eyebrow'),node('h3',item.poligono,'mono'),node('p',`Publicado: ${str(item.publicado)||'Sin fecha'}`,'muted small'),node('p',`${str(item.antes)||'—'} → ${str(item.despues)||'—'}`,'mono small'));
  if(item.parcial===true)card.append(node('p',`parcial${str(item.parcialDetalle).trim()?' · falta '+str(item.parcialDetalle):''}`,'ochre small'));
  const fixes=number(item.arreglos);if(fixes>0)card.append(node('p',`🛠 ${fixes} ${fixes===1?'arreglo':'arreglos'} en el Word`,'ochre small'));
- const t=item.totales||{},o=number(t.otroCampo),s=number(t.sinCambio);
- const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',confirma(t),'number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',s+number(t.noAplicaConCambio),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
+ const t=item.totales||{},o=number(t.otroCampo);
+ const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',confirma(t),'number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',pendingTotal(item),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const u=number(t.otraUnidad);if(u)card.append(node('p',`◐ ${u} otra unidad del lote`,'ochre small')); // dato aparte: no suma a Pendientes ni a SICUN confirma
+ const sigueMal=sigueMalTexto(t);if(sigueMal)card.append(node('p',sigueMal,'ochre small'));
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
  }
  $('polygon-count').textContent=`${visible.length} de ${items.length} polígonos`;
@@ -164,6 +166,7 @@ function renderArreglos(data){
 }
 /* ◐ otra unidad del lote: total aparte (publicaciones nuevas). Sin totales.otraUnidad (publicaciones viejas) o en 0 no se muestra nada. */
 function otraUnidadTexto(t){const u=number((t||{}).otraUnidad);return u?` ◐ ${u} otra unidad del lote = SICUN no cambió la unidad marcada, pero sí otra unidad (CRC) del mismo lote; el CRC y los campos están en Resultado SICUN (filtro «◐ Cambió otra unidad del lote»). Aparece en la lista, pero no suma al número de Pendientes ni a SICUN confirma.`:'';}
+function sigueMalTexto(t){const n=number((t||{}).sigueMal);return n>0?`◐ ${n} cambió pero sigue mal`:'';}
 let downloadingReport=null;
 function hasReport(data){
  return data.reporte===true||state.items.some(item=>str(item.poligono)===str(data.poligono)&&item.reporte===true);
@@ -175,7 +178,8 @@ function updateExcelButton(){
 }
 function renderDetail(data,keep){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
- $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);
+ $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. ◐ sigue mal = SICUN sí cambió, pero el dato corregido todavía incumple una regla del validador. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);
+ const sigueMal=sigueMalTexto(data.totales);if(sigueMal)$('explanation').append(' '+sigueMal+'.');
  const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
  $('chips').replaceChildren();
  for(const tec of ['',...technicians.filter(Boolean)]){const b=node('button',tec||'Todos','chip');b.type='button';b.dataset.tec=tec;b.append(node('span',data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&pending(r)).length));b.onclick=()=>navigate(route().pol,tec);$('chips').append(b);}
@@ -193,7 +197,7 @@ function filter(){
  for(const b of $('chips').children)b.setAttribute('aria-pressed',String(b.dataset.tec===tec));
  const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&str(r.codigo).toUpperCase().includes(search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
  state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));updateExcelButton();$('copy-status').textContent='';
- for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
+ for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',sigueMal:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
 }
 async function copy(text,out=$('copy-status')){try{await navigator.clipboard.writeText(text);out.textContent='Copiado al portapapeles.';}catch{out.textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
