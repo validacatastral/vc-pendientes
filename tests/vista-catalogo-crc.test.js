@@ -87,3 +87,24 @@ assert.strictEqual(oldCells[7].textContent,legacyResult);
 assert.strictEqual(oldCells[7].children.length,0);
 
 console.log('ok catálogo CIIU, búsqueda y copia del CRC renombrado, y filas antiguas');
+
+// La descarga usa el reporte publicado aunque las filas visibles tengan CRC nuevo.
+require('node:test')('descarga el reporte publicado con o sin CRC nuevo',async()=>{
+ const button={disabled:false},downloads=[],requests=[];
+ const data={poligono:'260210019'};
+ const exportState={data,visible:[]};
+ vm.runInNewContext(cut("$('download-xlsx').onclick=async", "$('back').onclick"),{
+  $:id=>id==='download-xlsx'?button:{},
+  state:exportState,str:String,route:()=>({pol:data.poligono}),
+  updateExcelButton(){},downloadingReport:null,
+  api:async (...args)=>{requests.push(args);return {base64:'UEs='};},
+  atob,saveXlsx:(bytes,name)=>downloads.push([Array.from(bytes),name]),
+  xlsxBytes:()=>assert.fail('Debe descargar el reporte publicado')
+ });
+ for(const row of [updated,legacy]){
+  exportState.visible=[row];
+  await button.onclick();
+ }
+ assert.deepStrictEqual(requests,Array(2).fill([data.poligono,false,'reporte']));
+ assert.deepStrictEqual(downloads,Array(2).fill([[80,75],'reporte_260210019.xlsx']));
+});
