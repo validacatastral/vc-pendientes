@@ -13,6 +13,11 @@
 :root[data-theme=dark]{color-scheme:dark;--bg:#191d1b;--panel:#222824;--ink:#e5e8df;--muted:#afb7ac;--line:#414a41;--green:#a0c0a5;--ochre:#d2b575;--brick:#dda291;--soft:#303831}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,sans-serif}button,input,select{font:inherit;color:inherit}button,a,input,select{touch-action:manipulation}button{cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:9px 13px}button:hover{border-color:var(--green)}button:disabled{cursor:default;opacity:.5}a{color:var(--green)}:focus-visible{outline:3px solid var(--ochre);outline-offset:3px}header{border-bottom:1px solid var(--line);background:var(--panel)}.top{max-width:1440px;margin:auto;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-size:12px;font-weight:700;letter-spacing:.12em}main{max-width:1440px;margin:auto;padding:40px 28px 64px}h1,h2,h3{font-family:'Inter Tight',Inter,sans-serif;line-height:1.15;margin:0 0 14px}h1{font-size:clamp(32px,5vw,50px);letter-spacing:-.035em}h2{font-size:28px}h3{font-size:22px}.muted{color:var(--muted)}.intro{max-width:720px;margin-bottom:30px}.eyebrow{color:var(--green);text-transform:uppercase;font-size:11px;letter-spacing:.15em;font-weight:700;margin-bottom:12px}.mono,.number{font-family:'JetBrains Mono',monospace}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}.card,.notice,.filters{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px}.card{border-top:3px solid var(--green)}.card p{margin:8px 0}.metrics{display:flex;justify-content:space-between;gap:12px;border-block:1px solid var(--line);padding:18px 0;margin:18px 0}.number{font-size:29px;line-height:1.3}.green{color:var(--green)}.ochre{color:var(--ochre)}.brick{color:var(--brick)}.small{font-size:12px}.wide{width:100%}.detail-head,.list-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:22px 0}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip[aria-pressed=true]{background:var(--green);color:var(--bg);border-color:var(--green)}.chip span{font-family:'JetBrains Mono',monospace;margin-left:8px}.filters{margin:20px 0;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}label{display:block;font-size:12px;font-weight:600}select,input{display:block;width:100%;min-width:0;margin-top:6px;padding:11px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.notice{color:var(--muted);line-height:1.8}.table-wrap{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th{text-align:left;font-weight:600;color:var(--muted);background:var(--soft)}td,th{padding:13px 10px;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}td{max-width:210px}td button{font-size:11px;margin-top:7px;padding:5px 8px;display:block}tr:last-child td{border-bottom:0}.badge{font-weight:600}.empty{text-align:center;padding:36px}.status{min-height:24px;color:var(--green);margin:8px 0}footer{border-top:1px solid var(--line);padding:24px 28px;color:var(--muted);font-size:12px}[hidden]{display:none!important}.actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.fix{border-top-color:var(--ochre);margin:20px 0}.fix .list-head{margin:0 0 4px}.fix h3{margin:0 0 4px}.fix td{max-width:none}
 @media(max-width:700px){.top{padding:16px}.brand{font-size:10px;max-width:210px}main{padding:28px 16px 40px}.filters{grid-template-columns:1fr;padding:18px}.card,.notice{padding:18px}.table-wrap{border:0;background:none;overflow:visible}table,tbody{display:block;width:100%}thead{display:none}tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:9px;margin-bottom:14px;padding:18px}td{display:block;padding:0;border:0;max-width:none;min-width:0}td:before{content:attr(data-label);display:block;color:var(--muted);font:500 10px Inter,sans-serif;margin-bottom:4px}td:nth-child(n+8),.fix td:nth-child(3){grid-column:1/-1}button{max-width:100%;overflow-wrap:anywhere}.chips{gap:6px}.chip{font-size:12px}.mono{overflow-wrap:anywhere}}
+#catalog{width:min(560px,calc(100% - 32px));max-height:calc(100% - 32px);color:var(--ink)}
+#catalog::backdrop{background:#0007}
+#catalog-title{margin:0 0 12px}
+#catalog-results{padding-inline-start:20px}
+.crc-renamed{margin-top:8px}
 </style>
 </head>
 <body>
@@ -40,6 +45,13 @@
 <p id="empty" class="notice empty" hidden>No hay filas para estos filtros.</p>
 </section>
 </main><footer>ValidaCatastral ©diegocampos — Uso interno.</footer>
+<dialog id="catalog" class="card" role="dialog" aria-labelledby="catalog-title">
+ <h2 id="catalog-title"></h2>
+ <form method="dialog"><button type="submit" id="catalog-close">Cerrar</button></form>
+ <label id="catalog-filter">Buscar CIIU<input id="catalog-search" type="search" autocomplete="off" autofocus></label>
+ <p id="catalog-status" role="status" class="muted" hidden></p>
+ <ul id="catalog-results"></ul>
+</dialog>
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbwcXmwvdy0D5ROteOFL9z_fbmelZhE11bgG_nS7McpqDXzlTa28KHd6EgnUChisjZjF/exec';
 'use strict';
@@ -190,14 +202,370 @@ function renderDetail(data,keep){
  }else{$('result').value='pending';$('search').value='';}
  renderArreglos(data);$('detail').hidden=false;filter();
 }
+// Copia del catálogo de VAL_USO_CIIU v16 (vc-comparador). Si cambia el catálogo, volver a copiar.
+var CIIU = {
+  "010101":[],"010102":[],"010103":[],
+  "010201":[],
+  "020101":["4711"],
+  "020102":["4781","4782","4789","6810","6820","4721","4722","4723","4741","4742","4751","4752","4753","4759","4761","4762","4763","4764","4771","4772","4773","4774","5610","5629","5630","9601","9602","9609","9511","9512","9523","9529","8219","7420","8690","8211","6910"],
+  "020103":["5210"],"020104":["4730"],
+  "020105":["4719","4721","4722","4723","4730","4741","4742","4751","4752","4753","4759","4761","4762","4763","4764","4771","4772","4773","4774","4530"],
+  "020106":["4781","4782","4789","4721","4722","4723","4741","4742","4751","4752","4753","4759","4761","4762","4763","4764","4771","4772","4773","4774","5610","5629","5630","9601","9602","9609","9511","9512","9523","9529","8219","7420","8690","8211","6910"],
+  "020199":[],
+  "020201":["9601","9602","9603","9609","6910","7911","9523","8219","6190","8220","9511","9529","4520","7420","7912","7990","7729","7810","7820","8211","8291","8299","7310","7410","1811","9512","8020","8230","7721","7722"],
+  "020202":["4520","4540","9511","9512","9521","9522","9523","9524","9529","3311","3312","3313","3314","3315","3319","3320"],
+  "020203":["5610","5629","5630","5621"],"020204":["5510","5590","5520"],"020205":["7500"],
+  "020301":["6910","6920","7020","7010","6201","6202","6209","6311","6312","6391","5811","5812","5819","5820","6820","7110","7310","7320","7410","7490","7740","7830","8010","8030","8211","8291","5229"],
+  "020302":[],"020303":["6810","6820"],"020304":[],
+  "030101":["1010","1020","1030","1040","1050","1061","1062","1071","1072","1073","1074","1075","1079","1080"],
+  "030102":["1101","1102","1103","1104"],"030103":["1200"],
+  "030104":["1311","1312","1313","1391","1392","1393","1394","1399"],"030105":["1410","1420","1430"],
+  "030106":["1511","1512","1520"],"030107":["1610","1621","1622","1623","1629"],"030108":["1701","1702","1709"],
+  "030109":["1811","1812","1820"],"030110":["1910","1920"],
+  "030111":["2011","2012","2013","2021","2022","2023","2029","2030"],"030112":["2100"],
+  "030113":["2211","2219","2220"],"030114":["2310","2391","2392","2393","2394","2395","2396","2399"],
+  "030115":["2410","2420","2431","2432"],"030116":["2511","2512","2513","2520","2591","2592","2593","2599"],
+  "030117":["2610","2620","2630","2640","2651","2652","2660","2670","2680"],
+  "030118":["2710","2720","2731","2732","2733","2740","2750","2790"],
+  "030119":["2811","2812","2813","2814","2815","2816","2817","2818","2819","2821","2822","2823","2824","2825","2826","2829"],
+  "030120":["2910","2920","2930"],"030121":["3011","3012","3020","3040","3091","3092","3099","3030"],
+  "030122":["3100"],"030199":["3211","3212","3220","3230","3240","3250","3290"],
+  "040101":[],"040102":["9311"],"040103":["9312"],"040104":["9311"],"040105":["8541"],
+  "040199":["9329","9311","9319"],
+  "040201":["9102"],"040202":["9000"],"040203":["9000"],"040204":["9101"],"040205":["9000"],"040206":["9103"],
+  "040299":["9000","8542"],
+  "040301":["9499"],"040302":["5914"],"040303":["9200","9321"],"040304":["9329"],"040305":["9329","5630"],
+  "040306":["9329"],"040307":["9329"],"040399":["9329"],
+  "050101":["8510","8521"],"050102":["8549"],"050103":["8530"],"050104":["8530","8522"],"050105":["8510"],
+  "050199":["8549","8550"],
+  "050201":["8610"],"050202":["8620"],"050203":["9603"],"050204":["9603"],"050299":["8690"],
+  "050301":["4921","4922","4923","5221"],"050302":["4911","4912"],"050303":["5011","5012","5222","5021","5022"],
+  "050304":["5110","5120","5223"],"050305":["5221"],
+  "050401":["5310","5320"],"050402":["6010","6020"],"050403":["5813"],"050404":["6110","6120","6130"],
+  "050499":["6399","6190"],
+  "050501":["3510"],"050502":["3600","3700"],"050503":["3520","4930"],"050504":["3510","6190"],
+  "060101":["8411","8421"],"060199":["8412","8413","8430"],
+  "060201":["8422"],"060202":["8423"],"060203":["8423"],"060204":["8423"],
+  "060301":["6411","6419","6420","6430","6491","6492","6499","6511","6512","6520","6530","6611","6612","6619","6621","6622","6629","6630"],
+  "060302":["6530","6511","6512","6520","6622"],"060303":["6612"],"060399":["6499"],
+  "060401":["9900"],
+  "060501":["7010"],
+  "060601":["9491"],"060602":["9491"],"060603":["9491"],"060604":["9491"],"060699":["9491"],
+  "060701":["8730","8710","8720","8790"],"060799":["8890","8810"],
+  "060801":["9420"],"060802":["9492"],"060803":["9412","9411"],"060899":["9499"],
+  "060901":["9499","7210","7220"],
+  "070101":[],
+  "070201":[]
+};
+
+var USO_NOMBRE = {"010101": "Vivienda", "010102": "Depósito de vivienda", "010103": "Tendal", "010201": "Cochera", "020101": "Tienda por departamentos, supermercado, galería comercial, hiperbodega y similares", "020102": "Mercado o campo ferial", "020103": "Almacén o depósito", "020104": "Grifo venta de combustibles para vehículos", "020105": "Tienda de venta de artículos al por menor", "020106": "Puesto (o stand) en galería comercial, mercado o campo ferial", "020199": "Otros usos comerciales no especificados", "020201": "Local de servicios diversos", "020202": "Taller", "020203": "Restaurantes, bares y cantinas", "020204": "Alojamiento", "020205": "Centro Veterinario", "020301": "Oficina", "020302": "Estacionamiento o deposito en edificio de oficinas", "020303": "Centro Comercial", "020304": "Comercial no identificado", "030101": "Elaboración de productos alimenticios", "030102": "Elaboración de bebidas", "030103": "Elaboración de productos de tabaco", "030104": "Elaboración de productos textiles", "030105": "Elaboración de prendas de vestir", "030106": "Elaboración de cueros y productos conexos", "030107": "Producción de madera y fabricación de productos de madera y corcho, excepto muebles", "030108": "Fabricación de papel y de productos de papel", "030109": "Impresión y reproducción de grabaciones", "030110": "Fabricación de coque y productos de la refinación del petróleo", "030111": "Fabricación de sustancias y productos químicos", "030112": "Fabricación de productos farmacéuticos, sustancias químicas medicinales y productos botánicos de uso farmacéutico", "030113": "Fabricación de productos de caucho y de plástico", "030114": "Fabricación de otros productos minerales no metálicos", "030115": "Fabricación de metales comunes", "030116": "Fabricación de productos elaborados de metal, excepto maquinaria y equipo", "030117": "Fabricación de productos de informática, de electrónica, relojes y de óptica", "030118": "Fabricación de equipo eléctrico", "030119": "Fabricación de maquinaria y equipo n.c.p.", "030120": "Fabricación de vehículos automotores, remolques y semirremolques", "030121": "Fabricación de otros tipos de equipo de transporte", "030122": "Fabricación de muebles", "030199": "Otras industrias manufactureras", "040101": "Parques (local, zonal y metropolitano)", "040102": "Estadio, hipódromo o coliseo", "040103": "Club, círculo o centro deportivo", "040104": "Gimnasio y similares", "040105": "Educación deportiva", "040199": "Otros usos deportivos NEP", "040201": "Museo", "040202": "Sala de exposición, galería de arte", "040203": "Teatro", "040204": "Biblioteca", "040205": "Centro cultural", "040206": "Jardín botánico y zoológico", "040299": "Otros usos culturales NEP", "040301": "Club social", "040302": "Cine", "040303": "Bingo, casino de juego, tragamonedas, casas de apuestas o similar", "040304": "Pinball y juegos recreativos", "040305": "Peña, discoteca, salón de bailes o similares", "040306": "Café teatro, cabaré, centro nocturno, boite", "040307": "Casa de cita, prostíbulo", "040399": "Otros servicios de recreación o esparcimiento NEP", "050101": "Educación inicial, primaria y/o secundaria", "050102": "Educación preuniversitaria (Academia)", "050103": "Educación superior (Universitaria o instituto)", "050104": "Educación técnica y CENECAPE", "050105": "Cuna, guardería", "050199": "Otros usos educativos NEP", "050201": "Establecimiento de Salud", "050202": "Consultorio médico", "050203": "Cementerio", "050204": "Velatorio", "050299": "Otros usos de salud NEP", "050301": "Terminal terrestre y servicios relacionados", "050302": "Terminal ferroviario y servicios relacionados", "050303": "Terminal marítimo y servicios relacionados", "050304": "Terminal aéreo y servicios relacionados", "050305": "Playa o edificio de estacionamiento", "050401": "Correo o mensajería", "050402": "Radio o televisión", "050403": "Periodismo", "050404": "Telefonía o internet", "050499": "Otros usos de información y/o comunicación NEP", "050501": "Generación, distribución o transmisión de energía eléctrica", "050502": "Centro de captación, purificación y distribución de agua", "050503": "Producción y distribución de gas", "050504": "Subestación eléctrica o telefónica", "060101": "Sede de entidad pública", "060199": "Otros usos de administración pública en general NEP", "060201": "Cuartel policial o militar", "060202": "Comisaría o delegación policial", "060203": "Centro de rehabilitación y asistencia social (C.R.A.S.-Cárceles)", "060204": "Sede de compañía de bomberos", "060301": "Sede o agencia de entidad financiera", "060302": "Sede o agencia de seguros o AFP", "060303": "Casa de cambio", "060399": "Otros establecimientos NEP", "060401": "Embajada, consulado o legación", "060501": "Sede de organismo internacional", "060601": "Templo", "060602": "Convento o monasterio", "060603": "Parroquia", "060604": "Sede de entidad religiosa", "060699": "Otros usos de entidades religiosas NEP", "060701": "Hospicio, albergue, puericultorio o asilo", "060799": "Otros usos de entidad social-comunal sin alojamiento NEP", "060801": "Actividad sindical", "060802": "Actividad política", "060803": "Asociaciones empresariales o colegios profesionales", "060899": "Otros usos de asociación y/o fundación NEP", "060901": "Instituto de investigación y científico", "070101": "Terreno sin construir", "070201": "Aires"};
+
+var CIIU_DESC = {
+"01":"Agricultura, ganadería, caza y actividades de servicios conexas","0111":"Cultivo de cereales (excepto arroz), legumbres y semillas oleaginosas",
+"0112":"Cultivo de arroz","0113":"Cultivo de hortalizas y melones, raíces y tubérculos","0114":"Cultivo de caña de azúcar","0115":"Cultivo de tabaco",
+"0116":"Cultivo de plantas de fibras","0119":"Cultivo de otras plantas no perennes","0121":"Cultivo de uvas",
+"0122":"Cultivo de frutas tropicales y subtropicales","0123":"Cultivo de cítricos","0124":"Cultivo de frutas con hueso y con pepa",
+"0125":"Cultivo de otros frutos y nueces de árboles y arbustos","0126":"Cultivo de frutos oleaginosos",
+"0127":"Cultivo de plantas con las que se preparan bebidas","0128":"Cultivo de especias y de plantas aromáticas, medicinales y farmacéuticas",
+"0129":"Cultivo de otras plantas perennes","0130":"Propagación de plantas","0141":"Cría de ganado bovino y búfalos","0142":"Cría de caballos y otros equinos",
+"0143":"Cría de camellos y otros camélidos","0144":"Cría de ovejas y cabras","0145":"Cría de cerdos","0146":"Cría de aves de corral",
+"0149":"Cría de otros animales","0150":"Cultivo de productos agrícolas en combinación con la cría de animales (explotación mixta)",
+"0161":"Actividades de apoyo a la agricultura","0162":"Actividades de apoyo a la ganadería","0163":"Actividades poscosecha",
+"0164":"Tratamiento de semillas para propagación","0170":"Caza ordinaria, mediante trampas y actividades de servicios conexas",
+"02":"Silvicultura y extracción de madera","0210":"Silvicultura y otras actividades forestales","0220":"Extracción de madera",
+"0230":"Recolección de productos forestales distintos de la madera","0240":"Servicios de apoyo a la silvicultura","03":"Pesca y acuicultura",
+"0311":"Pesca marina","0312":"Pesca de agua dulce","0321":"Acuicultura marina","0322":"Acuicultura de agua dulce",
+"05":"Extracción de carbón de piedra y lignito","0510":"Extracción de carbón de piedra","0520":"Extracción de lignito",
+"06":"Extracción de petróleo crudo y gas natural","0610":"Extracción de petróleo crudo","0620":"Extracción de gas natural",
+"07":"Extracción de minerales metalíferos","0710":"Extracción de minerales de hierro","0721":"Extracción de minerales de uranio y torio",
+"0729":"Extracción de otros minerales metalíferos no ferrosos","08":"Explotación de otras minas y canteras","0810":"Extracción de piedra, arena y arcilla",
+"0891":"Extracción de minerales para la fabricación de abonos y productos químicos","0892":"Extracción de turba","0893":"Extracción de sal",
+"0899":"Explotación de otras minas y canteras n.c.p.","09":"Actividades de servicios de apoyo para la explotación de minas y canteras",
+"0910":"Actividades de apoyo para la extracción de petróleo y gas natural","0990":"Actividades de apoyo para la explotación de otras minas y canteras",
+"10":"Elaboración de productos alimenticios","1010":"Elaboración y conservación de carne",
+"1020":"Elaboración y conservación de pescados, crustáceos y moluscos","1030":"Elaboración y conservación de frutas, legumbres y hortalizas",
+"1040":"Elaboración de aceites y grasas de origen vegetal y animal","1050":"Elaboración de productos lácteos","1061":"Elaboración de productos de molinería",
+"1062":"Elaboración de almidones y productos derivados del almidón","1071":"Elaboración de productos de panadería","1072":"Elaboración de azúcar",
+"1073":"Elaboración de cacao, chocolate y productos de confitería","1074":"Elaboración de macarrones, fideos, alcuzcuz y productos farináceos similares",
+"1075":"Elaboración de comidas y platos preparados","1079":"Elaboración de otros productos alimenticios n.c.p.",
+"1080":"Elaboración de alimentos preparados para animales","11":"Elaboración de bebidas","1101":"Destilación, rectificación y mezcla de bebidas alcohólicas",
+"1102":"Elaboración de vinos","1103":"Elaboración de bebidas malteadas y de malta",
+"1104":"Elaboración de bebidas no alcohólicas; producción de aguas minerales y otras aguas embotelladas","12":"Elaboración de productos de tabaco",
+"1200":"Elaboración de productos de tabaco","13":"Fabricación de productos textiles","1311":"Preparación e hilatura de fibras textiles",
+"1312":"Tejedura de productos textiles","1313":"Servicio de acabado de productos textiles","1391":"Fabricación de tejidos de punto y ganchillo",
+"1392":"Fabricación de artículos confeccionados de materiales textiles, excepto prendas de vestir","1393":"Fabricación de tapices y alfombras",
+"1394":"Fabricación de cuerdas, cordeles, bramantes y redes","1399":"Fabricación de otros productos textiles n.c.p.","14":"Fabricación de prendas de vestir",
+"1410":"Fabricación de prendas de vestir, excepto prendas de piel","1420":"Fabricación de artículos de piel",
+"1430":"Fabricación de artículos de punto y ganchillo","15":"Fabricación de cueros y productos conexos",
+"1511":"Curtido y adobo de cueros; adobo y teñido de pieles",
+"1512":"Fabricación de maletas, bolsos de mano y artículos similares, artículos de talabartería y guarnicionería","1520":"Fabricación de calzado",
+"16":"Producción de madera y fabricación de productos de madera y corcho, excepto muebles; fabricación de artículos de paja y de materiales trenzables",
+"1610":"Aserrado y acepilladura de madera","1621":"Fabricación de hojas de madera para enchapado y tableros a base de madera",
+"1622":"Fabricación de partes y piezas de carpintería para edificios y construcciones","1623":"Fabricación de recipientes de madera",
+"1629":"Fabricación de otros productos de madera; fabricación de artículos de corcho, paja y materiales trenzables",
+"17":"Fabricación de papel y de productos de papel","1701":"Fabricación de pasta de madera, papel y cartón",
+"1702":"Fabricación de papel y cartón ondulado y de envases de papel y cartón","1709":"Fabricación de otros artículos del papel y cartón",
+"18":"Impresión y reproducción de grabaciones","1811":"Actividades de impresión","1812":"Actividades de servicios relacionados con la impresión",
+"1820":"Reproducción de grabaciones","19":"Fabricación de coque y de productos de la refinación del petróleo",
+"1910":"Fabricación de productos de horno de coque","1920":"Fabricación de productos de la refinación del petróleo",
+"20":"Fabricación de substancias y productos químicos","2011":"Fabricación de substancias químicas básicas",
+"2012":"Fabricación de abonos y compuestos de nitrógeno","2013":"Fabricación de plásticos y cauchos sintéticos en formas primarias",
+"2021":"Fabricación de plaguicidas y otros productos químicos de uso agropecuario",
+"2022":"Fabricación de pinturas, barnices y productos de revestimiento similares, tintas de imprenta y masillas",
+"2023":"Fabricación de jabones y detergentes, preparados para limpiar y pulir, perfumes y preparados de tocador",
+"2029":"Fabricación de otros productos químicos n.c.p.","2030":"Fabricación de fibras artificiales",
+"21":"Fabricación de productos farmacéuticos, sustancias químicas medicinales y productos botánicos de uso farmacéutico",
+"2100":"Fabricación de productos farmacéuticos, sustancias químicas medicinales y productos botánicos de uso farmacéutico",
+"22":"Fabricación de productos de caucho y plástico","2211":"Fabricación de cubiertas y cámaras de caucho; recauchutado y renovación de cubiertas de caucho",
+"2219":"Fabricación de otros productos de caucho","2220":"Fabricación de productos de plástico","23":"Fabricación de otros productos minerales no metálicos",
+"2310":"Fabricación de vidrio y productos de vidrio","2391":"Fabricación de productos refractarios",
+"2392":"Fabricación de materiales de construcción de arcilla","2393":"Fabricación de otros productos de porcelana y de cerámica",
+"2394":"Fabricación de cemento, cal y yeso","2395":"Fabricación de artículos de hormigón, de cemento y yeso","2396":"Corte, tallado y acabado de la piedra",
+"2399":"Fabricación de otros productos minerales no metálicos n.c.p.","24":"Fabricación de metales comunes","2410":"Industrias básicas de hierro y acero",
+"2420":"Fabricación de productos primarios de metales preciosos y metales no ferrosos","2431":"Fundición de hierro y acero",
+"2432":"Fundición de metales no ferrosos","25":"Fabricación de productos elaborados de metal, excepto maquinaria y equipo",
+"2511":"Fabricación de productos metálicos para uso estructural","2512":"Fabricación de tanques, depósitos y recipientes de metal",
+"2513":"Fabricación de generadores de vapor, excepto calderas de agua caliente para calefacción central","2520":"Fabricación de armas y municiones",
+"2591":"Forja, prensado, estampado y laminado de metales; pulvimetalurgia","2592":"Tratamiento y revestimiento de metales; maquinado",
+"2593":"Fabricación de artículos de cuchillería, herramientas de mano y artículos de ferretería",
+"2599":"Fabricación de otros productos elaborados de metal n.c.p.","26":"Fabricación de productos de informática, electrónica y óptica",
+"2610":"Fabricación de componentes y tableros electrónicos","2620":"Fabricación de computadoras y equipo periférico",
+"2630":"Fabricación de equipo de comunicaciones","2640":"Fabricación de aparatos electrónicos de consumo",
+"2651":"Fabricación de equipos de medición, prueba, navegación, control y de relojes","2652":"Fabricación de relojes",
+"2660":"Fabricación de equipo de irradiación, y equipo electrónico de uso medico y terapéutico",
+"2670":"Fabricación de instrumentos ópticos y equipo fotográficos","2680":"Fabricación de soportes magnéticos y ópticos","27":"Fabricación de equipo eléctrico",
+"2710":"Fabricación de motores, generadores, transformadores eléctricos y aparatos de distribución y control de la energía eléctrica",
+"2720":"Fabricación de pilas, baterías y acumuladores","2731":"Fabricación de cables de fibra óptica","2732":"Fabricación de otros hilos y cables eléctricos",
+"2733":"Fabricación de dispositivos de cableado","2740":"Fabricación de equipo eléctrico de iluminación","2750":"Fabricación de aparatos de uso doméstico",
+"2790":"Fabricación de otros tipos de equipo eléctrico","28":"Fabricación de maquinaria y equipo n.c.p.",
+"2811":"Fabricación de motores y turbinas, excepto motores para aeronaves, vehículos automotores y motocicletas",
+"2812":"Fabricación de equipo de propulsión de fluidos","2813":"Fabricación de otras bombas, compresores, grifos y válvulas",
+"2814":"Fabricación de cojinetes, engranajes, trenes de engranajes y piezas de transmisión","2815":"Fabricación de hornos y quemadores",
+"2816":"Fabricación de equipo de elevación y manipulación","2817":"Fabricación de maquinaria y equipo de oficina (excepto computadoras y equipo periférico)",
+"2818":"Fabricación de herramientas de mano motorizadas","2819":"Fabricación de otros tipos de maquinaria de uso general",
+"2821":"Fabricación de maquinaria agropecuaria y forestal","2822":"Fabricación de maquinaria para la conformación de metales y de máquinas herramienta",
+"2823":"Fabricación de maquinaria metalúrgica","2824":"Fabricación de maquinaria para la explotación de minas y canteras y para obras de construcción",
+"2825":"Fabricación de maquinaria para la elaboración de alimentos, bebidas y tabaco",
+"2826":"Fabricación de maquinaria para la elaboración de productos textiles, prendas de vestir y cueros",
+"2829":"Fabricación de otros tipos de maquinaria de uso especial","29":"Fabricación de vehículos automotores, remolques y semirremolques",
+"2910":"Fabricación de vehículos automotores","2920":"Fabricación de carrocerías para vehículos automotores; fabricación de remolques y semirremolques",
+"2930":"Fabricación de partes, piezas y accesorios para vehículos automotores","30":"Fabricación de otros tipos de equipos de transporte",
+"3011":"Construcción de buques y estructuras flotantes","3012":"Construcción de embarcaciones de recreo y deporte",
+"3020":"Fabricación de locomotoras y material rodante","3030":"Fabricación de aeronaves y naves especiales y maquinaria conexa",
+"3040":"Fabricación de vehículos militares de combate","3091":"Fabricación de motocicletas",
+"3092":"Fabricación de bicicletas y de sillas de ruedas para inválidos","3099":"Fabricación de otros tipos de equipo de transporte n.c.p.",
+"31":"Fabricación de muebles","3100":"Fabricación de muebles","32":"Otras industrias manufactureras","3211":"Fabricación de joyas y artículos conexos",
+"3212":"Fabricación de bisutería y artículos conexos","3220":"Fabricación de instrumentos musicales","3230":"Fabricación de artículos de deporte",
+"3240":"Fabricación de juegos y juguetes","3250":"Fabricación de instrumentos y materiales médicos y odontológicos",
+"3290":"Otras industrias manufactureras n.c.p.","33":"Reparación e instalación de maquinaria y equipo","3311":"Reparación de productos elaborados de metal",
+"3312":"Reparación de maquinaria","3313":"Reparación de equipo electrónico y óptico","3314":"Reparación de equipo eléctrico",
+"3315":"Reparación de equipo de transporte, excepto vehículos automotores","3319":"Reparación de otros tipos de equipo",
+"3320":"Instalación de maquinaria y equipo industriales","35":"Suministro de electricidad, gas, vapor y aire acondicionado",
+"3510":"Generación, transmisión y distribución de energía eléctrica","3520":"Fabricación de gas; distribución de combustibles gaseosos por tuberías",
+"3530":"Suministro de vapor y de aire acondicionado","36":"Captación, tratamiento y distribución de agua",
+"3600":"Captación, tratamiento y distribución de agua","37":"Evacuación de aguas residuales","3700":"Evacuación de aguas residuales",
+"38":"Recolección, tratamiento y eliminación de desechos, recuperación de materiales","3811":"Recolección de desechos no peligrosos",
+"3812":"Recolección de desechos peligrosos","3821":"Tratamiento y eliminación de desechos no peligrosos",
+"3822":"Tratamiento y eliminación de desechos peligrosos","3830":"Recuperación de materiales",
+"39":"Actividades de descontaminación y otros servicios de gestión de desechos",
+"3900":"Actividades de descontaminación y otros servicios de gestión de desechos","41":"Construcción de edificios","4100":"Construcción de edificios",
+"42":"Obras de ingeniería civil","4210":"Construcción de carreteras y líneas de ferrocarril","4220":"Construcción de proyectos de servicios públicos",
+"4290":"Construcción de otras obras de ingeniería civil","43":"Actividades especializadas de la construcción","4311":"Demolición",
+"4312":"Preparación del terreno","4321":"Instalaciones eléctricas","4322":"Fontanería (plomería, gasfitería) e instalación de calefacción y aire acondicionado",
+"4329":"Otras instalaciones para obras de construcción","4330":"Terminación y acabado de edificios","4390":"Otras actividades especializadas de construcción",
+"45":"Comercio y reparación de vehículos automotores y motocicletas","4510":"Venta de vehículos automotores",
+"4520":"Mantenimiento y reparación de vehículos automotores","4530":"Venta de partes, piezas y accesorios para vehículos automotores",
+"4540":"Venta, mantenimiento y reparación de motocicletas y de sus partes, piezas y accesorios",
+"46":"Comercio al por mayor, excepto el de vehículos automotores y motocicletas","4610":"Venta al por mayor a cambio de una comisión o por contrato",
+"4620":"Venta al por mayor de materias primas agropecuarias y animales vivos","4630":"Venta al por mayor de alimentos, bebidas y tabaco",
+"4641":"Venta al por mayor de textiles, prendas de vestir y calzado","4649":"Venta al por mayor de otros enseres domésticos",
+"4651":"Venta al por mayor de computadoras, equipo y programas informáticos",
+"4652":"Venta al por mayor de equipo, partes y piezas electrónicos y de telecomunicaciones",
+"4653":"Venta al por mayor de maquinaria, equipo y materiales agropecuarios","4659":"Venta al por mayor de otros tipos de maquinaria y equipo",
+"4661":"Venta al por mayor de combustibles sólidos, líquidos y gaseosos y productos conexos","4662":"Venta al por mayor de metales y minerales metalíferos",
+"4663":"Venta al por mayor de materiales para la construcción, artículos de ferretería, equipo, materiales de fontanería (plomería o gasfitería) y calefacción",
+"4669":"Venta al por mayor de desperdicios, desechos, chatarra y otros productos n.c.p.","4690":"Venta al por mayor de otros productos no especializado",
+"47":"Comercio al por menor, excepto el de vehículos automotores y motocicletas",
+"4711":"Venta al por menor en comercios no especializados con predominio de la venta de alimentos, bebidas o tabaco",
+"4719":"Otras actividades de venta al por menor en comercios no especializados","4721":"Venta al por menor de alimentos en comercios especializados",
+"4722":"Venta al por menor de bebidas en comercios especializados","4723":"Venta al por menor de tabaco en comercios especializados",
+"4730":"Venta al por menor de combustibles para vehículos automotores en comercios especializados",
+"4741":"Venta al por menor de computadores, equipo periférico, programas informáticos y equipo de telecomunicaciones en comercios especializados",
+"4742":"Venta al por menor de equipo de sonido y vídeo en comercios especializados",
+"4751":"Venta al por menor de productos textiles en comercios especializados",
+"4752":"Venta al por menor de artículos de ferretería, pinturas y productos de vidrio en comercios especializados",
+"4753":"Venta al por menor de tapices, alfombras y cubrimientos para paredes y pisos en comercios especializados",
+"4759":"Venta al por menor de aparatos eléctricos de uso doméstico, muebles, equipo de iluminación y otros enseres domésticos en comercios especializados",
+"4761":"Venta al por menor de libros, periódicos y artículos de papelería en comercios especializados",
+"4762":"Venta al por menor de grabaciones de música y de vídeo en comercios especializados",
+"4763":"Venta al por menor de equipo de deporte en comercios especializados","4764":"Venta al por menor de juegos y juguetes en comercios especializados",
+"4771":"Venta al por menor de prendas de vestir, calzado y artículos de cuero en comercios especializados",
+"4772":"Venta al por menor de productos farmacéuticos y medicinales, cosméticos y artículos de tocador en comercios especializados",
+"4773":"Venta al por menor de otros productos nuevos en comercios especializados",
+"4774":"Venta al por menor de artículos de segunda mano en comercios especializados",
+"4781":"Venta al por menor de alimentos, bebidas y tabaco en puestos de venta y mercados",
+"4782":"Venta al por menor de productos textiles, prendas de vestir y calzado en puestos de venta y mercados",
+"4789":"Venta al por menor de otros productos en puestos de venta y mercados","4791":"Venta al por menor por correo y por internet",
+"4799":"Otras actividades de venta al por menor no realizadas en comercios, puestos de venta o mercados","49":"Transporte por vía terrestre y por tuberías",
+"4911":"Transporte interurbano de pasajeros por ferrocarril","4912":"Transporte de carga por ferrocarril",
+"4921":"Transporte urbano y suburbano de pasajeros por vía terrestre","4922":"Otras actividades de transporte de pasajeros por vía terrestre",
+"4923":"Transporte de carga por carretera","4930":"Transporte por tuberías","50":"Transporte por vía acuática",
+"5011":"Transporte de pasajeros marítimo y de cabotaje","5012":"Transporte de carga marítimo y de cabotaje",
+"5021":"Transporte de pasajeros por vías de navegación interiores","5022":"Transporte de carga, por vías de navegación interiores",
+"51":"Transporte por vía aérea","5110":"Transporte de pasajeros por vía aérea","5120":"Transporte de carga por vía aérea",
+"52":"Almacenamiento y actividades de apoyo al transporte","5210":"Almacenamiento y depósito",
+"5221":"Actividades de servicios vinculadas al transporte terrestre","5222":"Actividades de servicios vinculadas al transporte acuático",
+"5223":"Actividades de servicios vinculadas al transporte aéreo","5224":"Manipulación de carga","5229":"Otras actividades de apoyo al transporte",
+"53":"Actividades postales y de mensajería","5310":"Actividades postales","5320":"Actividades de mensajería","55":"Actividades de alojamiento",
+"5510":"Actividades de alojamiento para estancias cortas","5520":"Actividades de campamentos, parques de vehículos de recreo y parques de caravanas",
+"5590":"Otras actividades de alojamiento","56":"Servicio de alimento y bebida","5610":"Actividades de restaurantes y de servicio móvil de comidas",
+"5621":"Suministro de comidas por encargo","5629":"Otras actividades de servicio de comidas","5630":"Actividades de servicio de bebidas",
+"58":"Actividades de publicación","5811":"Publicación de libros, periódicos y otras actividades de publicación",
+"5812":"Publicación de directorios y de listas de correo","5813":"Publicación de periódicos, diarios y revistas","5819":"Otras publicaciones",
+"5820":"Publicación de programas informáticos",
+"59":"Actividades de producción de películas cinematográficas, vídeos y programas de televisión, grabación de sonido y edición de música",
+"5911":"Actividades de producción de películas cinematográficas, vídeos y programas de televisión",
+"5912":"Actividades de postproducción de películas cinematográficas, vídeos y programas de televisión",
+"5913":"Actividades de distribución de películas cinematográficas, vídeos y programas de televisión",
+"5914":"Actividades de exhibición de películas cinematográficas y cintas de vídeo","5920":"Actividades de grabación de sonido y edición de música",
+"60":"Actividades de programación y transmisión","6010":"Transmisiones de radio","6020":"Programación y transmisiones de televisión","61":"Telecomunicaciones",
+"6110":"Actividades de telecomunicaciones alámbrica","6120":"Actividades de telecomunicaciones inalámbricas",
+"6130":"Actividades de telecomunicaciones por satélite","6190":"Otras actividades de telecomunicaciones",
+"62":"Programación informática, consultoría de informática y actividades conexas","6201":"Actividades de programación informática",
+"6202":"Actividades de consultoría de informática y de gestión de instalaciones informáticas",
+"6209":"Otras actividades de tecnología de la información y de servicios informáticos","63":"Actividades de servicios de información",
+"6311":"Procesamiento de datos, hospedaje y actividades conexas","6312":"Portales web","6391":"Actividades de agencias de noticias",
+"6399":"Otras actividades de servicios de información n.c.p.","64":"Actividades de servicios financieros, excepto las de seguros y fondos de pensiones",
+"6411":"Banca central","6419":"Otros tipos de intermediación monetaria","6420":"Actividades de sociedades de cartera",
+"6430":"Fondos y sociedades de inversión y entidades financieras similares","6491":"Arrendamiento financiero",
+"6492":"Otras actividades de concesión de crédito","6499":"Otras actividades de servicios financieros, excepto las de seguros y fondos de pensiones, n.c.p.",
+"65":"Seguros, reaseguros y fondos de pensiones, excepto los planes de seguridad social de afiliación obligatoria","6511":"Seguros de vida",
+"6512":"Seguros generales","6520":"Reaseguros","6530":"Fondos de pensión","66":"Actividades auxiliares de las actividades de servicios financieros",
+"6611":"Administración de mercados financieros","6612":"Corretaje de valores y de contratos de productos básicos",
+"6619":"Otras actividades auxiliares a las actividades de servicios financieros","6621":"Evaluación de riesgos y daños",
+"6622":"Actividades de los agentes y corredores de seguro","6629":"Otras actividades auxiliares de seguros y fondos de pensiones",
+"6630":"Actividades de gestión de fondos","68":"Actividades inmobiliarias","6810":"Actividades inmobiliarias realizadas con bienes propios o arrendados",
+"6820":"Actividades inmobiliarias realizadas a cambio de una retribución o por contrato","69":"Actividades jurídicas y de contabilidad",
+"6910":"Actividades jurídicas","6920":"Actividades de contabilidad, teneduría de libros y auditorias; consultoría fiscal",
+"70":"Actividades de oficinas principales; actividades de consultoría de gestión","7010":"Actividades de oficinas principales",
+"7020":"Actividades de consultoría de gestión","71":"Actividades de arquitectura e ingeniería; ensayos y análisis técnicos",
+"7110":"Actividades de arquitectura e ingeniería y actividades conexas de consultoría técnica","7120":"Ensayos y análisis técnicos",
+"72":"Investigación científica y desarrollo","7210":"Investigaciones y desarrollo experimental en el campo de las ciencias naturales y la ingeniería",
+"7220":"Investigaciones y desarrollo experimental en el campo de las ciencias sociales y las humanidades","73":"Publicidad y estudios de mercado",
+"7310":"Publicidad","7320":"Estudios de mercado y encuestas de opinión pública","74":"Otras actividades profesionales, científicas y técnicas",
+"7410":"Actividades especializadas de diseño","7420":"Actividades de fotografía","7490":"Otras actividades profesionales, científicas y técnicas n.c.p.",
+"75":"Actividades veterinarias","7500":"Actividades veterinarias","77":"Actividades de alquiler y arrendamiento","7710":"Alquiler de vehículos automotores",
+"7721":"Alquiler de equipo recreativo y deportivo","7722":"Alquiler de cintas de video y discos",
+"7729":"Alquiler otros efectos personales y artículos de uso domésticos","7730":"Alquiler de otros tipos de maquinaria, equipo y bienes tangibles",
+"7740":"Arrendamiento de propiedad intelectual y productos similares, excepto obras protegidas por derechos de autor","78":"Actividades de empleo",
+"7810":"Actividades de agencias de empleo","7820":"Actividades de agencias de empleo temporal","7830":"Otras actividades de dotación de recursos humanos",
+"79":"Actividades de agencias de viajes, operadores turísticos, servicios de reservas y actividades conexas","7911":"Actividades de agencias de viajes",
+"7912":"Actividades de operadores turísticos","7990":"Otros servicios de reservas y actividades conexas","80":"Actividades de seguridad e investigación",
+"8010":"Actividades de seguridad privada","8020":"Actividades de servicios de sistemas de seguridad","8030":"Actividades de investigación",
+"81":"Actividades de servicios a edificios y paisajismo","8110":"Actividades combinadas de apoyo a instalaciones","8121":"Limpieza general de edificios",
+"8129":"Otras actividades de limpieza de edificios e instalaciones industriales","8130":"Actividades de paisajismo y servicios de mantenimiento conexos",
+"82":"Actividades administrativas y de apoyo de oficina y otras actividades de apoyo a las empresas",
+"8211":"Actividades combinadas de servicios administrativos de oficina",
+"8219":"Fotocopiado, preparación de documentos y otras actividades especializadas de apoyo de oficina","8220":"Actividades de centros de llamadas",
+"8230":"Organización de convenciones y exposiciones comerciales","8291":"Actividades de agencias de cobro y agencias de calificación crediticia",
+"8292":"Actividades de envasado y empaquetado","8299":"Otras actividades de servicios de apoyo a empresas n.c.p.",
+"84":"Administración pública y defensa; planes de seguridad social de afiliación obligatoria","8411":"Actividades de la administración pública en general",
+"8412":"Regulación de las actividades de organismos que prestan servicios sanitarios, educativos, culturales y otros servicios sociales, excepto servicios de seguridad social",
+"8413":"Regulación y facilitación de la actividad económica","8421":"Relaciones exteriores","8422":"Actividades de defensa",
+"8423":"Actividades de mantenimiento del orden público y de seguridad","8430":"Actividades de planes de seguridad social de afiliación obligatoria",
+"85":"Enseñanza","8510":"Enseñanza preprimaria y primaria","8521":"Enseñanza secundaria de formación general",
+"8522":"Enseñanza de formación técnica y profesional","8530":"Enseñanza superior","8541":"Enseñanza deportiva y recreativa","8542":"Enseñanza cultural",
+"8549":"Otros tipos de enseñanza n.c.p.","8550":"Actividades de apoyo a la enseñanza","86":"Actividades de atención de la salud humana",
+"8610":"Actividades de hospitales y clínicas","8620":"Actividades de médicos y odontólogos","8690":"Otras actividades de atención de la salud humana",
+"87":"Actividades de atención en instituciones","8710":"Actividades de atención de enfermería en instituciones",
+"8720":"Actividades de atención en instituciones para personas con retraso mental, enfermos mentales y toxicómanos",
+"8730":"Actividades de atención en instituciones para personas de edad y personas con discapacidad","8790":"Otras actividades de atención en instituciones",
+"88":"Actividades de asistencia social sin alojamiento",
+"8810":"Actividades de asistencia social sin alojamiento para personas de edad y personas con discapacidad",
+"8890":"Otras actividades de asistencia social sin alojamiento","90":"Actividades creativas, artísticas y de entretenimiento",
+"9000":"Actividades creativas, artísticas y de entretenimiento","91":"Actividades de bibliotecas, archivos, museos y otras actividades culturales",
+"9101":"Actividades de bibliotecas y archivos","9102":"Actividades de museos y gestión de lugares y edificios históricos",
+"9103":"Actividades de jardines botánicos y zoológicos y reservas naturales","92":"Actividades de juegos de azar y apuestas",
+"9200":"Actividades de juegos de azar y apuestas","93":"Actividades deportivas, de esparcimiento y recreativas",
+"9311":"Explotación de instalaciones deportivas","9312":"Actividades de clubes deportivos","9319":"Otras actividades deportivas",
+"9321":"Actividades de parques de atracciones y parques temáticos","9329":"Otras actividades de esparcimiento y recreativas n.c.p.",
+"94":"Actividades de asociaciones","9411":"Actividades de asociaciones empresariales y de empleadores","9412":"Actividades de asociaciones profesionales",
+"9420":"Actividades de sindicatos","9491":"Actividades de organizaciones religiosas","9492":"Actividades de organizaciones políticas",
+"9499":"Actividades de otras asociaciones n.c.p.","95":"Reparación de computadores y de efectos personales y enseres domésticos",
+"9511":"Reparación de computadoras y equipo periférico",
+"9512":"Reparación de equipo de comunicaciones","9521":"Reparación de aparatos electrónicos de consumo",
+"9522":"Reparación de aparatos de uso doméstico y equipo doméstico y de jardinería","9523":"Reparación de calzado y artículos de cuero",
+"9524":"Reparación de muebles y accesorios domésticos","9529":"Reparación de otros bienes personales y enseres domésticos",
+"96":"Otras actividades de servicios personales","9601":"Lavado y limpieza, incluida la limpieza en seco, de productos textiles y de piel",
+"9602":"Actividades de peluquería y otros tratamientos de belleza","9603":"Pompas fúnebres y actividades conexas",
+"9609":"Otras actividades de servicios personales n.c.p.","97":"Actividades de los hogares como empleadores de personal doméstico",
+"9700":"Actividades de los hogares como empleadores de personal doméstico",
+"98":"Actividades no diferenciadas de los hogares como productores de bienes y servicios para uso propio",
+"9810":"Actividades no diferenciadas de los hogares como productores de bienes y servicios para uso propio",
+"9820":"Actividades no diferenciadas de los hogares como productores de servicios para uso propio",
+"99":"Actividades de organizaciones y órganos extraterritoriales","9900":"Actividades de organizaciones y órganos extraterritoriales",
+};
+
 const COLUMNS=['Técnico','Validador','FI','CRC','Sec-Mz-Lt','Piso','Marcó','Resultado SICUN','Campos que cambiaron','Observación'];
 function rowValues(row){return [row.tecnico,row.validador,row.fi,row.codigo,row.smz,row.piso,row.estado,row.resultado,row.campos,row.obs];}
+function matchesCrc(row,search){
+ return str(row.codigo).toUpperCase().includes(search)||str(row.crcNuevo).toUpperCase().includes(search);
+}
+function catalogFor(use){
+ if(!Object.hasOwn(CIIU,use))return {title:use,entries:[],message:'Uso no encontrado en el catálogo'};
+ const entries=CIIU[use].map(code=>({code,description:CIIU_DESC[code]}));
+ return {title:[use,USO_NOMBRE[use]].filter(Boolean).join(' '),entries,message:entries.length?'':'Este uso no tiene CIIU asociados.'};
+}
+function catalogSearch(text){
+ return text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+function openCatalog(use){
+ const dialog=$('catalog'),search=$('catalog-search'),results=$('catalog-results'),status=$('catalog-status');
+ const {title,entries,message}=catalogFor(use);
+ $('catalog-title').textContent=title;
+ $('catalog-filter').hidden=Boolean(message);
+ search.value='';
+ const render=()=>{
+  const query=catalogSearch(search.value);
+  const matches=entries.filter(({code,description})=>catalogSearch(code+' '+description).includes(query));
+  results.replaceChildren(...matches.map(({code,description})=>node('li',code+' · '+description)));
+  status.textContent=message||(matches.length?'':'No se encontraron CIIU.');
+  status.hidden=!status.textContent;
+ };
+ search.oninput=render;
+ render();
+ dialog.showModal();
+ (message?$('catalog-close'):search).focus();
+}
+function addCatalogButton(td,row){
+ const use=str(row.catUso);
+ if(!use)return;
+ const text=td.textContent,marker=/\(ver catálogo\)/i.exec(text);
+ const button=node('button',marker?marker[0]:'Ver catálogo');
+ button.type='button';
+ button.setAttribute('aria-haspopup','dialog');
+ button.onclick=()=>openCatalog(use);
+ if(marker){
+  button.style.display='inline-block';
+  td.replaceChildren(text.slice(0,marker.index),button,text.slice(marker.index+marker[0].length));
+ }else td.append(button);
+}
+function addCrcNotice(td,row){
+ const crc=str(row.crcNuevo);
+ if(!crc)return;
+ const notice=node('div','🔁 Renombrado → '+crc,'crc-renamed ochre');
+ const button=node('button','Copiar CRC nuevo');
+ button.type='button';
+ button.onclick=()=>copy(crc);
+ notice.append(button);
+ td.append(notice);
+}
 function filter(){
  if(!state.data)return;const {tec}=route(),result=$('result').value,validator=$('validator').value,search=$('search').value.trim().toUpperCase();
  for(const b of $('chips').children)b.setAttribute('aria-pressed',String(b.dataset.tec===tec));
- const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&str(r.codigo).toUpperCase().includes(search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
+ const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&matchesCrc(r,search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
  state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));updateExcelButton();$('copy-status').textContent='';
- for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',sigueMal:'ochre',verificado:'green'}[c]||'muted');}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);}tr.append(td);});$('rows').append(tr);}
+ for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',sigueMal:'ochre',verificado:'green'}[c]||'muted');addCatalogButton(td,row);}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);addCrcNotice(td,row);}tr.append(td);});$('rows').append(tr);}
 }
 async function copy(text,out=$('copy-status')){try{await navigator.clipboard.writeText(text);out.textContent='Copiado al portapapeles.';}catch{out.textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
@@ -222,7 +590,7 @@ function xlsxZip(files){
 }
 function xlsxBytes(rows){
  const X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',M='http://schemas.openxmlformats.org/spreadsheetml/2006/main',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',P='http://schemas.openxmlformats.org/package/2006/relationships',T='application/vnd.openxmlformats-officedocument.spreadsheetml.';
- const sheet=[COLUMNS,...rows.map(rowValues)].map((cells,r)=>`<row r="${r+1}">`+cells.map((value,c)=>`<c r="${xlsxCol(c)}${r+1}" s="1" t="inlineStr"><is><t xml:space="preserve">${xlsxEsc(value)}</t></is></c>`).join('')+'</row>').join('');
+ const sheet=[[...COLUMNS,'CRC nuevo'],...rows.map(row=>[...rowValues(row),row.crcNuevo])].map((cells,r)=>`<row r="${r+1}">`+cells.map((value,c)=>`<c r="${xlsxCol(c)}${r+1}" s="1" t="inlineStr"><is><t xml:space="preserve">${xlsxEsc(value)}</t></is></c>`).join('')+'</row>').join('');
  return xlsxZip([
   ['[Content_Types].xml',`${X}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="${T}sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="${T}worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="${T}styles+xml"/></Types>`],
   ['_rels/.rels',`${X}<Relationships xmlns="${P}"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
@@ -240,7 +608,7 @@ function saveXlsx(bytes,name){
 $('download-xlsx').onclick=async()=>{
  const data=state.data;
  if(!data||$('download-xlsx').disabled)return;
- {
+ if(!state.visible.some(row=>str(row.crcNuevo))){
   const pol=str(data.poligono),current=()=>state.data===data&&route().pol===pol;
   downloadingReport=data;updateExcelButton();$('copy-status').textContent='';
   try{
