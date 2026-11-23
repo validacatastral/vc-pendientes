@@ -36,7 +36,7 @@
 <button id="back" type="button">← Todos los polígonos</button>
 <div class="detail-head"><div><div class="eyebrow">Publicación <span id="published"></span></div><h2>Polígono <span id="polygon" class="mono"></span></h2></div><span class="muted">Selecciona tu nombre para revisar tus filas</span></div>
 <div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
-<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="sigueMal">◐ CAMBIÓ PERO SIGUE MAL</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
+<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="sigueMal">◐ CAMBIÓ PERO SIGUE MAL / REVISAR</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
 <p id="explanation" class="notice"></p>
 <section id="arreglos" class="card fix" aria-labelledby="arreglos-title" hidden><div class="list-head"><div><h3 id="arreglos-title">Arreglos en el Word</h3><span id="arreglos-revisado" class="muted small"></span></div><button id="copy-arreglos" type="button">Copiar CRC</button></div><p class="muted small">Se arregla a mano en el Word; desaparece al volver a pasar Revisar Word.</p><div id="arreglos-status" class="status" role="status" aria-live="polite"></div><div class="table-wrap"><table><thead><tr><th>Sección</th><th>CRC</th><th>Qué hacer</th></tr></thead><tbody id="arreglos-rows"></tbody></table></div></section>
 <div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button></span></div>
@@ -61,7 +61,7 @@ const str = value => value == null ? '' : typeof value === 'object' ? (Array.isA
 const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function category(row){
  const r = norm(row.resultado);
- if(r.startsWith('CAMBIOPEROSIGUEMAL')) return 'sigueMal';
+ if(r.startsWith('CAMBIOPEROSIGUEMAL')||r.startsWith('CAMBIOREVISAR')) return 'sigueMal';
  if(r.startsWith('CAMBIOOTRAUNIDAD')||r==='OTRAUNIDAD') return 'otraUnidad'; // aviso: en la lista de pendientes, pero fuera de pendingTotal y confirma(); trae CRC y campos en el resultado
  if(r.includes('NOAPLICA') || (norm(row.estado)==='NOAPLICA' && /CAMBIO|VERIFICADO|OTROCAMPO/.test(r) && !r.includes('SINCAMBIO'))) return 'noAplica';
  if(r.includes('SINCAMBIO')) return 'sinCambio';
@@ -190,7 +190,7 @@ function updateExcelButton(){
 }
 function renderDetail(data,keep){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
- $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. ◐ sigue mal = SICUN sí cambió, pero el dato corregido todavía incumple una regla del validador. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);
+ $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. ◐ sigue mal = SICUN sí cambió, pero el dato corregido todavía incumple una regla del validador. ◐ revisar = SICUN cambió, pero hay una advertencia del validador: confirmar que esté bien. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);
  const sigueMal=sigueMalTexto(data.totales);if(sigueMal)$('explanation').append(' '+sigueMal+'.');
  const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
  $('chips').replaceChildren();

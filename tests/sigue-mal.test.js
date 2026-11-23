@@ -15,7 +15,10 @@ for(const [resultado,estado] of [
   ['◐ Cambió pero sigue mal: R4A CIIU no corresponde al uso','APLICA'],
   ['◐ Cambió pero sigue mal: R2 NO APLICA X','APLICA'],
   ['◐ Cambió pero sigue mal: R2 NO APLICA X','NO APLICA'],
-  ['◐ CAMBIÓ PERO SIGUE MAL: R1','APLICA']
+  ['◐ CAMBIÓ PERO SIGUE MAL: R1','APLICA'],
+  ['◐ Cambió, revisar: uso genérico de suelo (R8B) · qué hacer: confirmar uso','APLICA'],
+  ['◐ Cambió, revisar: NO APLICA (R8B) · qué hacer: confirmar','NO APLICA'],
+  ['◐ Cambió, revisar: SIN CAMBIO (R8B) · qué hacer: confirmar','APLICA']
 ]){
   assert.strictEqual(T.category({resultado,estado}),'sigueMal',resultado);
   assert.strictEqual(T.pending({resultado,estado}),true,resultado);
