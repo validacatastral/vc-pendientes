@@ -36,7 +36,7 @@
 <button id="back" type="button">← Todos los polígonos</button>
 <div class="detail-head"><div><div class="eyebrow">Publicación <span id="published"></span></div><h2>Polígono <span id="polygon" class="mono"></span></h2></div><span class="muted">Selecciona tu nombre para revisar tus filas</span></div>
 <div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
-<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="sigueMal">◐ CAMBIÓ PERO SIGUE MAL / REVISAR</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
+<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="sigueMal">◐ CAMBIÓ PERO SIGUE MAL / REVISAR</option><option value="revisado">✔ REVISADO A MANO</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
 <p id="explanation" class="notice"></p>
 <section id="arreglos" class="card fix" aria-labelledby="arreglos-title" hidden><div class="list-head"><div><h3 id="arreglos-title">Arreglos en el Word</h3><span id="arreglos-revisado" class="muted small"></span></div><button id="copy-arreglos" type="button">Copiar CRC</button></div><p class="muted small">Se arregla a mano en el Word; desaparece al volver a pasar Revisar Word.</p><div id="arreglos-status" class="status" role="status" aria-live="polite"></div><div class="table-wrap"><table><thead><tr><th>Sección</th><th>CRC</th><th>Qué hacer</th></tr></thead><tbody id="arreglos-rows"></tbody></table></div></section>
 <div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button></span></div>
@@ -61,6 +61,7 @@ const str = value => value == null ? '' : typeof value === 'object' ? (Array.isA
 const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function category(row){
  const r = norm(row.resultado);
+ if(r.startsWith('REVISADOAMANO')) return 'revisado';
  if(r.startsWith('CAMBIOPEROSIGUEMAL')||r.startsWith('CAMBIOREVISAR')) return 'sigueMal';
  if(r.startsWith('CAMBIOOTRAUNIDAD')||r==='OTRAUNIDAD') return 'otraUnidad'; // aviso: en la lista de pendientes, pero fuera de pendingTotal y confirma(); trae CRC y campos en el resultado
  if(r.includes('NOAPLICA') || (norm(row.estado)==='NOAPLICA' && /CAMBIO|VERIFICADO|OTROCAMPO/.test(r) && !r.includes('SINCAMBIO'))) return 'noAplica';
@@ -69,7 +70,7 @@ function category(row){
  if(r.includes('VERIFICADO')) return 'verificado';
  return 'neutral';
 }
-const pending = row => ['sinCambio','noAplica','otroCampo','otraUnidad','sigueMal'].includes(category(row)); // lista por defecto y chips; otraUnidad NO suma a pendingTotal ni a confirma()
+const pending = row => ['sinCambio','noAplica','otroCampo','otraUnidad','sigueMal','revisado'].includes(category(row)); // lista por defecto y chips; otraUnidad NO suma a pendingTotal ni a confirma()
 function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=str(text);if(cls)e.className=cls;return e;}
 function theme(value){document.documentElement.dataset.theme=value;$('theme').textContent=value==='dark'?'Tema claro':'Tema oscuro';$('theme').setAttribute('aria-pressed',String(value==='dark'));}
 let saved;try{saved=localStorage.getItem('vc-pend-theme');}catch{}
@@ -105,7 +106,7 @@ function district(data){
 }
 const itemDistrict=item=>district(item)||state.districts.get(str(item.poligono))||'';
 /* SICUN confirma: solo ✔ verificado sobre las filas cruzadas (sin no encontrado ni inválido). ◐ cambió otro campo NO cuenta como confirmado. */
-function confirma(t){t=t||{};const den=number(t.filas)-number(t.noEncontrado)-number(t.invalido);return den>0?`${Math.round(number(t.verificado)/den*100)}%`:'—';}
+function confirma(t){t=t||{};const den=number(t.filas)-number(t.noEncontrado)-number(t.invalido)-number(t.revisado);return den>0?`${Math.round(number(t.verificado)/den*100)}%`:'—';}
 const pendingTotal=item=>number((item.totales||{}).sinCambio)+number((item.totales||{}).noAplicaConCambio)+number((item.totales||{}).sigueMal);
 function publishedTime(value){
  const text=str(value).trim(),local=text.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?(?:[ ,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
@@ -150,6 +151,7 @@ function renderHome(items){
  const t=item.totales||{},o=number(t.otroCampo);
  const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',confirma(t),'number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',pendingTotal(item),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const u=number(t.otraUnidad);if(u)card.append(node('p',`◐ ${u} otra unidad del lote`,'ochre small')); // dato aparte: no suma a Pendientes ni a SICUN confirma
+ const revisado=revisadoTexto(t);if(revisado)card.append(node('p',revisado,'green small'));
  const sigueMal=sigueMalTexto(t);if(sigueMal)card.append(node('p',sigueMal,'ochre small'));
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
  }
@@ -178,6 +180,7 @@ function renderArreglos(data){
 }
 /* ◐ otra unidad del lote: total aparte (publicaciones nuevas). Sin totales.otraUnidad (publicaciones viejas) o en 0 no se muestra nada. */
 function otraUnidadTexto(t){const u=number((t||{}).otraUnidad);return u?` ◐ ${u} otra unidad del lote = SICUN no cambió la unidad marcada, pero sí otra unidad (CRC) del mismo lote; el CRC y los campos están en Resultado SICUN (filtro «◐ Cambió otra unidad del lote»). Aparece en la lista, pero no suma al número de Pendientes ni a SICUN confirma.`:'';}
+function revisadoTexto(t){const n=number((t||{}).revisado);return n>0?`✔ ${n} revisados a mano`:'';}
 function sigueMalTexto(t){const n=number((t||{}).sigueMal);return n>0?`◐ ${n} cambió pero sigue mal`:'';}
 let downloadingReport=null;
 function hasReport(data){
@@ -191,6 +194,7 @@ function updateExcelButton(){
 function renderDetail(data,keep){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
  $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. ◐ sigue mal = SICUN sí cambió, pero el dato corregido todavía incumple una regla del validador. ◐ revisar = SICUN cambió, pero hay una advertencia del validador: confirmar que esté bien. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);
+ const revisado=revisadoTexto(data.totales);if(revisado)$('explanation').append(' '+revisado+'. ✔ revisado a mano = un encargado ya lo revisó; ver la columna REVISIÓN del Excel del validador.');
  const sigueMal=sigueMalTexto(data.totales);if(sigueMal)$('explanation').append(' '+sigueMal+'.');
  const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
  $('chips').replaceChildren();
@@ -508,6 +512,7 @@ var CIIU_DESC = {
 
 const COLUMNS=['Técnico','Validador','FI','CRC','Sec-Mz-Lt','Piso','Marcó','Resultado SICUN','Campos que cambiaron','Observación'];
 function rowValues(row){return [row.tecnico,row.validador,row.fi,row.codigo,row.smz,row.piso,row.estado,row.resultado,row.campos,row.obs];}
+function observacion(row){if(category(row)!=='revisado')return row.obs;const resultado=str(row.resultado),i=resultado.indexOf(': ');return i<0?row.obs:resultado.slice(i+2);}
 function matchesCrc(row,search){
  return str(row.codigo).toUpperCase().includes(search)||str(row.crcNuevo).toUpperCase().includes(search);
 }
@@ -565,7 +570,7 @@ function filter(){
  for(const b of $('chips').children)b.setAttribute('aria-pressed',String(b.dataset.tec===tec));
  const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&matchesCrc(r,search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
  state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));updateExcelButton();$('copy-status').textContent='';
- for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',sigueMal:'ochre',verificado:'green'}[c]||'muted');addCatalogButton(td,row);}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);addCrcNotice(td,row);}tr.append(td);});$('rows').append(tr);}
+ for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(i===9?observacion(row):value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',sigueMal:'ochre',revisado:'green',verificado:'green'}[c]||'muted');addCatalogButton(td,row);}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);addCrcNotice(td,row);}tr.append(td);});$('rows').append(tr);}
 }
 async function copy(text,out=$('copy-status')){try{await navigator.clipboard.writeText(text);out.textContent='Copiado al portapapeles.';}catch{out.textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
