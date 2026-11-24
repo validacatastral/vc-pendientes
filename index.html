@@ -36,12 +36,13 @@
 <button id="back" type="button">← Todos los polígonos</button>
 <div class="detail-head"><div><div class="eyebrow">Publicación <span id="published"></span></div><h2>Polígono <span id="polygon" class="mono"></span></h2></div><span class="muted">Selecciona tu nombre para revisar tus filas</span></div>
 <div id="chips" class="chips" role="group" aria-label="Filtrar por técnico"></div>
-<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="sigueMal">◐ CAMBIÓ PERO SIGUE MAL / REVISAR</option><option value="revisado">✔ REVISADO A MANO</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
+<div class="filters"><label>Resultado SICUN<select id="result"><option value="pending">Pendientes de atención (⚠ + ℹ + ◐)</option><option value="sinCambio">⚠ SIN CAMBIO EN SICUN</option><option value="noAplica">ℹ NO APLICA pero SICUN cambió</option><option value="otroCampo">◐ Cambió otro campo, no el observado</option><option value="otraUnidad">◐ Cambió otra unidad del lote</option><option value="sigueMal">◐ Cambió pero sigue mal</option><option value="revisar">◐ Cambió, revisar</option><option value="revisadoPendiente">Revisado a mano con pendiente SICUN</option><option value="revisado">✔ REVISADO A MANO</option><option value="all">Todos los resultados</option></select></label><label>Validador<select id="validator"><option value="">Todos los validadores</option></select></label><label>Buscar por CRC<input id="search" type="search" placeholder="Escribe un CRC" autocomplete="off"></label></div>
+<label><input type="checkbox" id="pRawChk"> Ver resultado SICUN sin revisión manual</label>
 <p id="explanation" class="notice"></p>
 <section id="arreglos" class="card fix" aria-labelledby="arreglos-title" hidden><div class="list-head"><div><h3 id="arreglos-title">Arreglos en el Word</h3><span id="arreglos-revisado" class="muted small"></span></div><button id="copy-arreglos" type="button">Copiar CRC</button></div><p class="muted small">Se arregla a mano en el Word; desaparece al volver a pasar Revisar Word.</p><div id="arreglos-status" class="status" role="status" aria-live="polite"></div><div class="table-wrap"><table><thead><tr><th>Sección</th><th>CRC</th><th>Qué hacer</th></tr></thead><tbody id="arreglos-rows"></tbody></table></div></section>
 <div class="list-head"><strong id="count" aria-live="polite"></strong><span style="display:flex;gap:8px;flex-wrap:wrap"><button id="copy-list" type="button">Copiar lista</button><button id="download-xlsx" type="button">Descargar Excel</button></span></div>
 <div id="copy-status" class="status" role="status" aria-live="polite"></div>
-<div class="table-wrap"><table><thead><tr><th>Técnico</th><th>Validador</th><th>FI</th><th>CRC</th><th>Sec-Mz-Lt</th><th>Piso</th><th>Marcó</th><th>Resultado SICUN</th><th>Campos que cambiaron</th><th>Observación</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Técnico</th><th>Validador</th><th>FI</th><th>CRC</th><th>Sec-Mz-Lt</th><th>Piso</th><th>Marcó</th><th>Resultado SICUN</th><th id="pRawHead" hidden>Resultado SICUN sin revisión manual</th><th>Campos que cambiaron</th><th>Observación</th></tr></thead><tbody id="rows"></tbody></table></div>
 <p id="empty" class="notice empty" hidden>No hay filas para estos filtros.</p>
 </section>
 </main><footer>ValidaCatastral ©diegocampos — Uso interno.</footer>
@@ -62,7 +63,8 @@ const norm = value => str(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'')
 function category(row){
  const r = norm(row.resultado);
  if(r.startsWith('REVISADOAMANO')) return 'revisado';
- if(r.startsWith('CAMBIOPEROSIGUEMAL')||r.startsWith('CAMBIOREVISAR')) return 'sigueMal';
+ if(r.startsWith('CAMBIOPEROSIGUEMAL')) return 'sigueMal';
+ if(r.startsWith('CAMBIOREVISAR')) return 'revisar';
  if(r.startsWith('CAMBIOOTRAUNIDAD')||r==='OTRAUNIDAD') return 'otraUnidad'; // aviso: en la lista de pendientes, pero fuera de pendingTotal y confirma(); trae CRC y campos en el resultado
  if(r.includes('NOAPLICA') || (norm(row.estado)==='NOAPLICA' && /CAMBIO|VERIFICADO|OTROCAMPO/.test(r) && !r.includes('SINCAMBIO'))) return 'noAplica';
  if(r.includes('SINCAMBIO')) return 'sinCambio';
@@ -70,7 +72,7 @@ function category(row){
  if(r.includes('VERIFICADO')) return 'verificado';
  return 'neutral';
 }
-const pending = row => ['sinCambio','noAplica','otroCampo','otraUnidad','sigueMal','revisado'].includes(category(row)); // lista por defecto y chips; otraUnidad NO suma a pendingTotal ni a confirma()
+const pending = row => ['sinCambio','noAplica','otroCampo','otraUnidad','sigueMal','revisar','revisado'].includes(category(row)); // lista por defecto y chips; otraUnidad NO suma a pendingTotal ni a confirma()
 function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=str(text);if(cls)e.className=cls;return e;}
 function theme(value){document.documentElement.dataset.theme=value;$('theme').textContent=value==='dark'?'Tema claro':'Tema oscuro';$('theme').setAttribute('aria-pressed',String(value==='dark'));}
 let saved;try{saved=localStorage.getItem('vc-pend-theme');}catch{}
@@ -107,7 +109,7 @@ function district(data){
 const itemDistrict=item=>district(item)||state.districts.get(str(item.poligono))||'';
 /* SICUN confirma: solo ✔ verificado sobre las filas cruzadas (sin no encontrado ni inválido). ◐ cambió otro campo NO cuenta como confirmado. */
 function confirma(t){t=t||{};const den=number(t.filas)-number(t.noEncontrado)-number(t.invalido)-number(t.revisado);return den>0?`${Math.round(number(t.verificado)/den*100)}%`:'—';}
-const pendingTotal=item=>number((item.totales||{}).sinCambio)+number((item.totales||{}).noAplicaConCambio)+number((item.totales||{}).sigueMal);
+const pendingTotal=item=>{const t=item.totales||{};return t.pendientes==null?number(t.sinCambio)+number(t.noAplicaConCambio)+number(t.sigueMal):number(t.pendientes);};
 function publishedTime(value){
  const text=str(value).trim(),local=text.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?(?:[ ,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
  // El comparador también publica fechas en formato peruano; evitar interpretarlas como mm/dd.
@@ -152,7 +154,7 @@ function renderHome(items){
  const metrics=node('div',undefined,'metrics');const confirmed=node('div');confirmed.append(node('div',confirma(t),'number green'),node('div','SICUN confirma','small muted'));const attention=node('div');const count=node('div',pendingTotal(item),'number brick');if(o)count.append(node('span',` · ◐ ${o}`,'ochre small'));attention.append(count,node('div','Pendientes','small muted'));metrics.append(confirmed,attention);card.append(metrics);
  const u=number(t.otraUnidad);if(u)card.append(node('p',`◐ ${u} otra unidad del lote`,'ochre small')); // dato aparte: no suma a Pendientes ni a SICUN confirma
  const revisado=revisadoTexto(t);if(revisado)card.append(node('p',revisado,'green small'));
- const sigueMal=sigueMalTexto(t);if(sigueMal)card.append(node('p',sigueMal,'ochre small'));
+ const sigueMal=sigueMalTexto(t);if(sigueMal)card.append(node('p',sigueMal,'ochre small'));const revisar=revisarTexto(t);if(revisar)card.append(node('p',revisar,'ochre small'));
  const open=node('button','Ver pendientes →','wide');open.type='button';open.onclick=()=>navigate(str(item.poligono));card.append(open);$('polygons').append(card);
  }
  $('polygon-count').textContent=`${visible.length} de ${items.length} polígonos`;
@@ -181,6 +183,7 @@ function renderArreglos(data){
 /* ◐ otra unidad del lote: total aparte (publicaciones nuevas). Sin totales.otraUnidad (publicaciones viejas) o en 0 no se muestra nada. */
 function otraUnidadTexto(t){const u=number((t||{}).otraUnidad);return u?` ◐ ${u} otra unidad del lote = SICUN no cambió la unidad marcada, pero sí otra unidad (CRC) del mismo lote; el CRC y los campos están en Resultado SICUN (filtro «◐ Cambió otra unidad del lote»). Aparece en la lista, pero no suma al número de Pendientes ni a SICUN confirma.`:'';}
 function revisadoTexto(t){const n=number((t||{}).revisado);return n>0?`✔ ${n} revisados a mano`:'';}
+function revisarTexto(t){const n=number((t||{}).revisar);return n>0?`◐ ${n} cambió, revisar`:'';}
 function sigueMalTexto(t){const n=number((t||{}).sigueMal);return n>0?`◐ ${n} cambió pero sigue mal`:'';}
 let downloadingReport=null;
 function hasReport(data){
@@ -195,7 +198,7 @@ function renderDetail(data,keep){
  $('polygon').textContent=str(data.poligono);$('published').textContent=str(data.publicado)||'sin fecha';
  $('explanation').textContent=`Comparación de SICUN entre ${str(data.antes)||'—'} y ${str(data.despues)||'—'}. ⚠ = marcaste APLICA/OTRO CAMBIO pero en SICUN no se registra cambio en ese predio. ℹ = marcaste NO APLICA pero SICUN sí cambió. ◐ = marcaste APLICA y SICUN cambió, pero en otro campo, no en el observado. ◐ sigue mal = SICUN sí cambió, pero el dato corregido todavía incumple una regla del validador. ◐ revisar = SICUN cambió, pero hay una advertencia del validador: confirmar que esté bien. Si ya lo corregiste después de ${str(data.despues)||'—'}, se actualizará en la próxima publicación.`+otraUnidadTexto(data.totales);
  const revisado=revisadoTexto(data.totales);if(revisado)$('explanation').append(' '+revisado+'. ✔ revisado a mano = un encargado ya lo revisó; ver la columna REVISIÓN del Excel del validador.');
- const sigueMal=sigueMalTexto(data.totales);if(sigueMal)$('explanation').append(' '+sigueMal+'.');
+ const sigueMal=sigueMalTexto(data.totales);if(sigueMal)$('explanation').append(' '+sigueMal+'.');const revisar=revisarTexto(data.totales);if(revisar)$('explanation').append(' '+revisar+'.');
  const technicians=[...new Set(data.filas.map(r=>str(r.tecnico)))].sort((a,b)=>a.localeCompare(b,'es'));
  $('chips').replaceChildren();
  for(const tec of ['',...technicians.filter(Boolean)]){const b=node('button',tec||'Todos','chip');b.type='button';b.dataset.tec=tec;b.append(node('span',data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&pending(r)).length));b.onclick=()=>navigate(route().pol,tec);$('chips').append(b);}
@@ -565,14 +568,17 @@ function addCrcNotice(td,row){
  notice.append(button);
  td.append(notice);
 }
+function manualConPendiente(row){return category(row)==='revisado' && ['sinCambio','noAplica','otroCampo','otraUnidad','sigueMal','revisar'].includes(category({...row,resultado:row.resultadoSicun}));}
 function filter(){
  if(!state.data)return;const {tec}=route(),result=$('result').value,validator=$('validator').value,search=$('search').value.trim().toUpperCase();
  for(const b of $('chips').children)b.setAttribute('aria-pressed',String(b.dataset.tec===tec));
- const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&matchesCrc(r,search)&&(result==='all'||(result==='pending'?pending(r):category(r)===result)));
- state.visible=rows;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));updateExcelButton();$('copy-status').textContent='';
- for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(i===9?observacion(row):value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',sigueMal:'ochre',revisado:'green',verificado:'green'}[c]||'muted');addCatalogButton(td,row);}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);addCrcNotice(td,row);}tr.append(td);});$('rows').append(tr);}
+ const rows=state.data.filas.filter(r=>(!tec||str(r.tecnico)===tec)&&(!validator||str(r.validador)===validator)&&matchesCrc(r,search)&&(result==='all'||(result==='pending'?pending(r):result==='revisadoPendiente'?manualConPendiente(r):category(r)===result)));
+ state.visible=rows;$('pRawHead').hidden=!$('pRawChk').checked;$('rows').replaceChildren();$('count').textContent=`${rows.length} ${rows.length===1?'fila':'filas'}${tec?' · '+tec:''}`;$('empty').hidden=rows.length>0;$('copy-list').disabled=!rows.some(r=>str(r.codigo));updateExcelButton();$('copy-status').textContent='';
+ for(const row of rows){const tr=node('tr');const values=rowValues(row),labels=COLUMNS;values.forEach((value,i)=>{const td=node('td',str(i===9?observacion(row):value)||'—',i>=2&&i<=5?'mono':'');td.dataset.label=labels[i];if(i===7){const c=category(row);td.className='badge '+({sinCambio:'brick',noAplica:'ochre',otroCampo:'ochre',otraUnidad:'ochre',sigueMal:'ochre',revisar:'ochre',revisado:'green',verificado:'green'}[c]||'muted');addCatalogButton(td,row);}if(i===3){const b=node('button','Copiar CRC');b.type='button';b.disabled=!str(row.codigo);b.onclick=()=>copy(str(row.codigo));td.append(b);addCrcNotice(td,row);}tr.append(td);if(i===7&&$('pRawChk').checked){const raw=node('td',str(row.resultadoSicun)||'— (publicación anterior)');raw.dataset.label='Resultado SICUN sin revisión manual';tr.append(raw);}});$('rows').append(tr);}
 }
 async function copy(text,out=$('copy-status')){try{await navigator.clipboard.writeText(text);out.textContent='Copiado al portapapeles.';}catch{out.textContent='No se pudo copiar. Selecciona el CRC y cópialo manualmente.';}}
+try{$('pRawChk').checked=localStorage.getItem('vc-pend-raw')==='1';}catch{}
+$('pRawChk').onchange=()=>{try{localStorage.setItem('vc-pend-raw',$('pRawChk').checked?'1':'0');}catch{}filter();};
 $('copy-list').onclick=()=>copy(state.visible.map(r=>str(r.codigo)).filter(Boolean).join('\n'));
 /* Descargar Excel: filas visibles con las columnas de la tabla. XLSX mínimo sin librerías (ZIP sin compresión);
    todas las celdas van como texto (inlineStr + formato @) para que CRC y FI conserven sus 24 dígitos y ceros, sin notación científica. */
