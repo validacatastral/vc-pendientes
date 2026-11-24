@@ -32,7 +32,7 @@ assert.deepStrictEqual(Object.keys(files).sort(),['[Content_Types].xml','_rels/.
 var sheet=files['xl/worksheets/sheet1.xml'];
 var grid=sheet.split('<row ').slice(1).map(function(r){return (r.match(/<c [^>]*>.*?<\/c>/g)||[]).map(function(c){return c.replace(/<[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');});});
 assert.deepStrictEqual(grid[0],['Técnico','Validador','FI','CRC','Sec-Mz-Lt','Piso','Marcó','Resultado SICUN','Campos que cambiaron','Observación']);
-assert(/<th>Técnico<\/th><th>Validador<\/th><th>FI<\/th><th>CRC<\/th><th>Sec-Mz-Lt<\/th><th>Piso<\/th><th>Marcó<\/th><th>Resultado SICUN<\/th><th>Campos que cambiaron<\/th><th>Observación<\/th><\/tr>/.test(html),'encabezados de la tabla');
+assert(/<th>Técnico<\/th><th>Validador<\/th><th>FI<\/th><th>CRC<\/th><th>Sec-Mz-Lt<\/th><th>Piso<\/th><th>Marcó<\/th><th>Resultado SICUN<\/th><th id="pRawHead" hidden>Resultado SICUN sin revisión manual<\/th><th>Campos que cambiaron<\/th><th>Observación<\/th><\/tr>/.test(html),'encabezados de la tabla');
 assert.strictEqual(grid.length,3);
 assert.deepStrictEqual(grid[1],['ANA','VAL_CRC',FI,CRC,'01-002-003','01','APLICA','⚠ SIN CAMBIO EN SICUN','CON · Área Verificada','DNI •••• revisar <uso> & "área"']);
 assert.deepStrictEqual(grid[2],['LUIS','VAL_TIT','','150110020030040010101999','02-003-004','','NO APLICA','ℹ NO APLICA pero SICUN cambió','','']);

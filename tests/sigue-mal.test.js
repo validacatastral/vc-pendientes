@@ -20,7 +20,7 @@ for(const [resultado,estado] of [
   ['◐ Cambió, revisar: NO APLICA (R8B) · qué hacer: confirmar','NO APLICA'],
   ['◐ Cambió, revisar: SIN CAMBIO (R8B) · qué hacer: confirmar','APLICA']
 ]){
-  assert.strictEqual(T.category({resultado,estado}),'sigueMal',resultado);
+  assert.strictEqual(T.category({resultado,estado}),resultado.includes('revisar:')?'revisar':'sigueMal',resultado);
   assert.strictEqual(T.pending({resultado,estado}),true,resultado);
 }
 for(const [resultado,categoria] of [
